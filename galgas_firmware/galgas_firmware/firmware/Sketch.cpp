@@ -23,21 +23,34 @@
 constexpr int LED1_PIN = 9; // uC pin 13, PB1
 constexpr int LED2_PIN = 10; // uC pin 14, PB2
 
+// func. decls:
+void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
+
 void setup()
 {
-	pinMode(LED1_PIN, OUTPUT);
-	pinMode(LED2_PIN, OUTPUT);
 }
 
-void loop() 
+void loop()
 {
-	// put your main code here, to run repeatedly:
+	do_led_ramp_up_down(LED1_PIN);
+	do_led_ramp_up_down(LED1_PIN);
+}
+
+
+
+void do_led_ramp_up_down(int led_id, int delay_speed_ms)
+{
+	pinMode(led_id, OUTPUT);
+
 	for (int pc = 0; pc <255; pc++)
 	{
-		analogWrite(LED1_PIN, pc);
-		analogWrite(LED2_PIN, pc);
-		delay(5);
+		analogWrite(led_id, pc);
+		delay(delay_speed_ms);
+	}
+	for (int pc = 255; pc >0; pc--)
+	{
+		analogWrite(led_id, pc);
+		delay(delay_speed_ms);
 	}
 
 }
-
