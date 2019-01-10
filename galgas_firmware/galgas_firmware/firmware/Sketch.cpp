@@ -28,15 +28,14 @@ constexpr int LED2_PIN = 10; // uC pin 14, PB2
 // The ADC:
 MCP342X adc;
 bool adc_init_ok = false;
-const auto ADC_GAIN = MCP342X_GAIN_4X;
+const auto ADC_GAIN = MCP342X_GAIN_1X;
 
 // The residual strain, acquired after reset:
 int16_t adc_zero_strain_offset = 0;
 
 // TODO: Adjust this constant, by trial and error.
 // TODO: Split in several constants with more physical meaning? See other TO-DOs below
-double STRAIN_TO_PWM_CONST = 0.1;
-
+double STRAIN_TO_PWM_CONST = 0.05;
 
 
 // func. decls:
@@ -120,10 +119,16 @@ void loop()
 	// TODO: Convert to actual strain value.
 	
 	// Convert to PWM (0-255)
-	int pwm_value= STRAIN_TO_PWM_CONST * real_strain;
+	double pwm_value_f= STRAIN_TO_PWM_CONST * real_strain;
+
+	// Saturate:
+	const bool is_negative = (pwm_value_f<0);
+	if (pwm_value_f<0) pwm_value_f=-pwm_value_f;
+	if (pwm_value_f>255) pwm_value_f = 255;
+	uint8_t pwm_value = static_cast<uint8_t>(pwm_value_f);
 	
 	// TODO: positive / negative, one LED or the other one.
-	analogWrite(LED1_PIN, pwm_value);
+	analogWrite(is_negative ? LED2_PIN : LED1_PIN, pwm_value);
 
 }
 
