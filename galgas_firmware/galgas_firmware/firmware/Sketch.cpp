@@ -45,8 +45,8 @@ void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
 void setup()
 {
 	// Flash LEDs at start up:
-	do_led_ramp_up_down(LED1_PIN);
-	do_led_ramp_up_down(LED1_PIN);
+	do_led_ramp_up_down(LED1_PIN, 3);
+	do_led_ramp_up_down(LED2_PIN, 3);
 
 	// Init I2C bus:
 	Wire.begin();
