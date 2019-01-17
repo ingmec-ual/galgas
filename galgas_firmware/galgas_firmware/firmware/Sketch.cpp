@@ -33,13 +33,12 @@ const auto ADC_GAIN = MCP342X_GAIN_1X;
 // The residual strain, acquired after reset:
 int16_t adc_zero_strain_offset = 0;
 
-// TODO: Adjust this constant, by trial and error.
-// TODO: Split in several constants with more physical meaning? See other TO-DOs below
-double STRAIN_TO_PWM_CONST = 0.05;
-
+// Calculated such as V_adc=0.3 ==> 100% of PWM LED output
+double STRAIN_TO_PWM_CONST = 255.5/ (0.3 * ((2<<15 - 1) / 2.5));
 
 // func. decls:
 void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
+
 
 void setup()
 {
