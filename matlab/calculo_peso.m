@@ -1,8 +1,20 @@
-function [F]=calculo_peso(N,x)
-% calculo del peso cuando la persona se encuentra en 
-% los casos 3, 4, 5 y 6 (todos menos caso 2)
-% vector de axiles en N
-v=N(2);
-p=(v*3)/(6-2*x);  % valor de la fuerza en N
-F=p/9.807;  % peso de la persona en Kg
+function [F]=calculo_peso(N,K,p)
+%   Calculo del peso cuando la persona
+%   Solo se produce deformaci?n el?stica
+if(p==2)
+    f=N(1)/K(1,1);
+end
+if(p==3)
+    f=N(1)/K(2,1);
+end
+if(p==4)
+    f=N(1)/K(3,1);
+end
+if(p==5)
+    f=N(1)/K(4,1);
+end
+if(p==6)
+    f=N(1)/K(5,1);
+end
+F=f/9.81;
 end
