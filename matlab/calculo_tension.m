@@ -1,7 +1,7 @@
 function [t]=calculo_tension(cg)
-% calulo de tensiones a partir de las deformaciones obtenidas por las
-% galgas extensiom?tricas 
-% deformaciones medidas en uE
+% Calulo de tensiones a partir de las deformaciones obtenidas por las
+% galgas extensiometricas 
+% Deformaciones medidas en uE
 E=66000; % modulo elastico del acero en N/mm2
 t1=cg(1)*1.0e-6*E;     % barra 4.5
 t2=cg(2)*1.0e-6*E;     % barra 13.12
