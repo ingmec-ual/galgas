@@ -22,7 +22,7 @@ function varargout = pantalla(varargin)
 
 % Edit the above text to modify the response to help pantalla
 
-% Last Modified by GUIDE v2.5 14-Oct-2019 17:47:32
+% Last Modified by GUIDE v2.5 14-Oct-2019 20:50:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -49,6 +49,8 @@ function pantalla_OpeningFcn(hObject, eventdata, handles, varargin)
 
 imshow('puente.jpg');
 axis equal;
+datos=[];
+set(handles.tabla,'data',datos);
 % Choose default command line output for pantalla
 handles.output = hObject;
 
@@ -69,9 +71,27 @@ function varargout = pantalla_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+% --- Executes on selection change in popupmenu.
+function popupmenu_Callback(hObject, eventdata, handles)
+global cg;
+global t;
+global N;
 
-% --- Executes on button press in calcularpeso.
-function calcularpeso_Callback(hObject, eventdata, handles)
+m=get(hObject,'Value');
+if(m==1)
+    datos=cg;   % Obtengo valores de deformacion 
+end
+if(m==2)
+    datos=t;    % Obtengo valores de tension
+end
+if(m==3)
+    datos=N;    % Obtengo valores de axiles
+end
+set(handles.tabla,'data', datos);
+
+
+% --- Executes on button press in run.
+function run_Callback(hObject, eventdata, handles)
 global C;
 global cg;
 global p;
@@ -79,25 +99,31 @@ global t;
 global N;
 global K;
 global F;
+
 C=casos;    
-cg=[-101.4849121, 67.6566081, 135.3132162, -572.8818233, 572.8818233, -572.8818233, -1145.763647];
+cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
 % Calculo la posicion sobre el puente
 p=posicion(cg,C);
-% Muestro en pantalla la posicion en la que se encuentra el calcularpeso
+% Muestro en pantalla la posicion en la que se encuentra el run
 if(p==2)
     imshow('caso2.jpg');
+    axis equal;
 end
 if(p==3)
     imshow('caso3.jpg');
+    axis equal;
 end
 if(p==4)
     imshow('caso4.jpg');
+    axis equal;
 end
 if(p==5)
     imshow('caso5.jpg');
+    axis equal;
 end
 if(p==6)
     imshow('caso6.jpg');
+    axis equal;
 end
 % Calculo el peso
 t=calculo_tension(cg);
@@ -106,3 +132,12 @@ K=constante;
 F=calculo_peso(N,K,p);
 
 set(handles.peso,'String',F);
+
+
+% --- Executes on button press in reset.
+function reset_Callback(hObject, eventdata, handles)
+set(handles.peso,'String', 0);
+imshow('puente.jpg');
+axis equal;
+datos=[];
+set(handles.tabla,'data',datos);
