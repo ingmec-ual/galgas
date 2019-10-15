@@ -151,6 +151,11 @@ imshow('puente.jpg');
 axis equal;
 datos=[];
 set(handles.tabla,'data',datos);
+axes(handles.axes3);
+hold off;
+grafica_puente;
+axis equal;
+
 
 
 % --- Executes when selected object is changed in uibuttongroup2.
@@ -160,11 +165,13 @@ global cg;
 TC=get(hObject,'String');
 switch TC
     case 'Traccion'
+        hold off
         axes(handles.axes3);
         traccion(cg);
         axis equal;
        
     case 'Compresion'
+        hold off
         axes(handles.axes3);
         compresion(cg);
         axis equal;
