@@ -10,3 +10,4 @@ galgas_firmware/galgas_firmware/ArduinoCore/Debug/
 galgas_firmware/galgas_firmware/firmware/Release/
 galgas_firmware/galgas_firmware/firmware/Debug/
 .DS_Store
+*.m~
