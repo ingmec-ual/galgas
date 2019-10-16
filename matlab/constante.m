@@ -1,7 +1,7 @@
 function [K]=constante
 %   Matriz constante de axiles
-%   N=K*F ya que no entra en la zona pl?stica
-%   solo se produce deformaci?n el?stica
+%   N=K*F ya que no entra en la zona plastica
+%   solo se produce deformacion elastica
 k2=[-1/2, 2/3, 1/3, sqrt(2)/6, -sqrt(2)/6, sqrt(2)/6, -sqrt(2)/6];
 k3=[-1, 4/3, 2/3, -2*sqrt(2)/3, -sqrt(2)/3, sqrt(2)/3, -sqrt(2)/3];
 k4=[-3/2, 1, 1, -sqrt(2)/2, sqrt(2)/2, sqrt(2)/2, -sqrt(2)/2];

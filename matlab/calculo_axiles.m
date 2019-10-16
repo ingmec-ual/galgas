@@ -1,5 +1,5 @@
 function [N]=calculo_axiles(t)
-% Calculo de axiles a partir de las tensiones
+% Calculo de axiles a partir de las tensiones (t)
 % Tensiones en MPa 
 o1=114.24;  % area barras principales en mm2
 o2=9.54;    % area diagonales y barras verticales en mm2

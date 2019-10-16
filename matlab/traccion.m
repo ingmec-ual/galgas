@@ -1,4 +1,7 @@
 function traccion(cg)
+%   Dibuja estructura del puente resaltando las barras que estan sometidas
+%   a traccion para cada caso de cg
+%   cg vector deformacion (uE) medido por las galgas
 v1=cg(1);
 v2=cg(2);
 v3=cg(3);
@@ -19,7 +22,8 @@ y=[1, 1, 0.5, 0.5];
 plot(x2,y,'k');
 hold on;
 
-%   Cuadrado 3
+%   Cuadrado 3 
+%   Cambia de color si esta sometido a traccion
 if((v1>0)&&(v2>0))
     xt31=[1.5, 2];
     yt31=[1, 1];
@@ -63,6 +67,7 @@ else
 end
 
 %   Cuadrado 4
+%   Cambia de color si esta sometido a traccion
 if(v3>0)
     x4=[2, 2.5, 2.5];
     y4=[1, 1, 0.5];
