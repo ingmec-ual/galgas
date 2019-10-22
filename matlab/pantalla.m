@@ -1,7 +1,17 @@
 function varargout = pantalla(varargin)
+
 % Interfaz del programa, muestra en pantalla la posicion en la que se
-% encuentra la persona, su peso, los valores de deformaci?n, axiles y
+% encuentra la persona, su peso, los valores de deformacion, axiles y
 % tensiones y las barras que estan sometidas a traccion y a compresion
+% -----------------------------------------------------------
+%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   University of Almeria
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+% -----------------------------------------------------------
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -178,7 +188,7 @@ switch TC
     case 'Compresion'
         hold off
         axes(handles.axes3);
-        compresion(cg); %Ejecuto script 
+        compresion(cg); % Ejecuto script 
         axis equal;
 end
 end

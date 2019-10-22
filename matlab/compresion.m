@@ -1,7 +1,17 @@
 function compresion(cg)
+
 %   Dibuja estructura del puente resaltando las barras que estan sometidas
 %   a compresion para cada caso de cg
 %   cg vector deformacion (uE) medido por las galgas 
+% -----------------------------------------------------------
+%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   University of Almeria
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+% -----------------------------------------------------------
 v1=cg(1);
 v2=cg(2);
 v3=cg(3);

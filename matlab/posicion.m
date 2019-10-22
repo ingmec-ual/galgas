@@ -1,9 +1,18 @@
 function [p]=posicion(cg,C)
+
 %   Calcula la posicion en la que se encuentra la persona sobre 
 %   el puente
 %   cg vector deformaciones medidas por las galgas en uE
 %   C matriz casos compuesta por los vectores normalizados
-
+% -----------------------------------------------------------
+%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   University of Almeria
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+% -----------------------------------------------------------
 cgn=(cg/max(abs(cg)));  %   vector deformaciones normalizado%
 %   Calculo la distancia de cada vector caso con el vector deformaciones
 %   medidas por las galgas

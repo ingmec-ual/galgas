@@ -1,6 +1,16 @@
 function [N]=calculo_axiles(t)
+
 % Calculo de axiles a partir de las tensiones (t)
-% Tensiones en MPa 
+% Tensiones en MPa
+% -----------------------------------------------------------
+%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   University of Almeria
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+% -----------------------------------------------------------
 o1=114.24;  % area barras principales en mm2
 o2=9.54;    % area diagonales y barras verticales en mm2
 N1=t(1)*o1;     % barra 4.5
