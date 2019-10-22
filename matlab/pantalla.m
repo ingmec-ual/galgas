@@ -4,7 +4,7 @@ function varargout = pantalla(varargin)
 % encuentra la persona, su peso, los valores de deformacion, axiles y
 % tensiones y las barras que estan sometidas a traccion y a compresion
 % -----------------------------------------------------------
-%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
 %
 %   This program is free software: you can redistribute it and/or modify
