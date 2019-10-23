@@ -266,7 +266,6 @@ if(m==3)
     datos=N;    % Obtengo valores de axiles
 end
 
-global datos;
 
 set(handles.tabla,'data', datos);
 
