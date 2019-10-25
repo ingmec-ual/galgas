@@ -4,7 +4,7 @@ function traccion(cg)
 %   a traccion para cada caso de cg
 %   cg vector deformacion (uE) medido por las galgas
 % -----------------------------------------------------------
-%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
 %
 %   This program is free software: you can redistribute it and/or modify
@@ -12,6 +12,7 @@ function traccion(cg)
 %   the Free Software Foundation, either version 3 of the License, or
 %   (at your option) any later version.
 % -----------------------------------------------------------
+
 v1=cg(1);
 v2=cg(2);
 v3=cg(3);

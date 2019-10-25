@@ -4,7 +4,7 @@ function [t]=calculo_tension(cg)
 % galgas extensiometricas 
 % cg vector deformaciones (uE) medidas por las galgas
 % -----------------------------------------------------------
-%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
 %
 %   This program is free software: you can redistribute it and/or modify
@@ -12,6 +12,7 @@ function [t]=calculo_tension(cg)
 %   the Free Software Foundation, either version 3 of the License, or
 %   (at your option) any later version.
 % -----------------------------------------------------------
+
 E=66000; % modulo elastico del acero en N/mm2
 t1=cg(1)*1.0e-6*E;     % barra 4.5
 t2=cg(2)*1.0e-6*E;     % barra 13.12

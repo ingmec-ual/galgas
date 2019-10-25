@@ -4,7 +4,7 @@ function [C]=casos
 %   una persona de 80Kg
 %   Deformaciones medidas en uE
 % -----------------------------------------------------------
-%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
 %
 %   This program is free software: you can redistribute it and/or modify
@@ -12,6 +12,7 @@ function [C]=casos
 %   the Free Software Foundation, either version 3 of the License, or
 %   (at your option) any later version.
 % -----------------------------------------------------------
+
 %   Caso 2
 c2=[-53.05, 66.31, 39.79, 317.64, -317.64, 317.64, -317.64];
 %barras [4.5, 13.12, 12.11, 4.14, 4.12, 12.6, 6.10]

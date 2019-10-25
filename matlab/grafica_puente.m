@@ -2,7 +2,7 @@ function grafica_puente
 
 %   Dibujo estructura del puente
 % -----------------------------------------------------------
-%   Copyright (c) 2018-2019, Laura G?mez ?lvarez 
+%   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
 %
 %   This program is free software: you can redistribute it and/or modify
