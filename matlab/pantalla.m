@@ -47,6 +47,9 @@ handles.timer = timer('Name','MyTimer',               ...
                       'TasksToExecute',inf,           ... 
                       'ExecutionMode','fixedSpacing', ...
                       'TimerFcn',{@timerCallback,hObject}); 
+       
+% Valor por defecto:
+handles.TC = 'Traccion';
                   
 % Update handles structure
 guidata(hObject, handles);
@@ -84,26 +87,27 @@ function tipo_esfuerzos_SelectionChangedFcn(hObject, ~, handles)
 % cg vector deformaciones medidas por las galgas en uE
 % TC variable con valor "Traccion" o "Compresion" segun el boton que este
 % presionado
-global cg;
-global TC;
-
-TC=get(hObject, 'String');
-
-switch TC
-case 'Traccion'
-        hold off
-        axes(handles.grafica);
-        traccion(cg);   % Ejecuto script
-        axis equal;
-       
-    case 'Compresion'
-        hold off
-        axes(handles.grafica);
-        compresion(cg); % Ejecuto script 
-        axis equal;
-end
+handles.TC=get(hObject, 'String');
+actualiza_grafica_barras(handles);
 end
 
+function actualiza_grafica_barras(handles)
+    global cg;
+
+    if (length(cg)<2)
+        return
+    end
+    
+    hold off
+    axes(handles.grafica);
+    switch handles.TC
+    case 'Traccion'
+            traccion(cg);   % Ejecuto script
+        case 'Compresion'
+            compresion(cg); % Ejecuto script 
+    end
+    axis equal;
+end
 
 % --- Funcion que se ejecuta al cambiar valores en popupmenu
 function popupmenu_Callback(hObject, ~, handles)
@@ -151,7 +155,7 @@ set(handles.tabla,'data',datos);
 % Grafica de la estructura del puente vuelve al original, sin indicar
 % barras sometidas a traccion o a compresion
 axes(handles.grafica);
-hold off;
+cla;
 grafica_puente;
 axis equal;
 end
@@ -188,7 +192,7 @@ end
 
 
 %--- Funcion que se repite mientras el temporizador esta en marcha
- function timerCallback(~, ~, hFigure)
+ function timerCallback(hObject, eventdata, hFigure)
  
 % C matriz de casos 
 % cg vector deformaciones medidas por las galgas en uE
@@ -209,46 +213,26 @@ global N;
 global K;
 global F;
 global datos;
-global TC;
 global texto;
 
 % --- Calculo el peso que hay sobre el puente. --------------------------
 
 C=casos;    % Ejecuto script
 cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
+% Sumar ruido aleatorio (mientras no se mida del real)
+cg = cg + randn(size(cg,1),size(cg,2))*0.1;
+
 % Calculo la posicion sobre el puente 
 p=posicion(cg,C);
 % Muestro en pantalla la posicion en la que se encuentra la persona
-if(p==2)
-    axes(handles.foto);
-    imshow('caso2.jpg');
-    axis equal;
-end
-if(p==3)
-    axes(handles.foto);
-    imshow('caso3.jpg');
-    axis equal;
-end
-if(p==4)
-    axes(handles.foto);
-    imshow('caso4.jpg');
-    axis equal;
-end
-if(p==5)
-    axes(handles.foto);
-    imshow('caso5.jpg');
-    axis equal;
-end
-if(p==6)
-    axes(handles.foto);
-    imshow('caso6.jpg');
-    axis equal;
-end
+img=imread(sprintf('caso%d.jpg',p));
+imshow(img,'Parent',handles.foto);
+axis equal;
 
 % Calculo el peso
 t=calculo_tension(cg);
 N=calculo_axiles(t);
-K=constante;
+K=constante();
 F=calculo_peso(N,K,p);
 
 % --- Muestro valores actuales del peso---------------------------------
@@ -259,20 +243,8 @@ set(handles.peso,'String',texto);
 ejecuto_popupmenu;
 set(handles.tabla,'data', datos);
 
-% --- Muestro los valores actuales de tipo_esfuerzos--------------------
-switch TC
-    case 'Traccion'
-        hold off
-        axes(handles.grafica);
-        traccion(cg);   % Ejecuto script
-        axis equal;
-       
-    case 'Compresion'
-        hold off
-        axes(handles.grafica);
-        compresion(cg); % Ejecuto script 
-        axis equal;
-end
+% Actualizo seleccion de TC:
+actualiza_grafica_barras(handles);
 
 guidata(hFigure,handles);
  end
@@ -304,4 +276,5 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
+
 
