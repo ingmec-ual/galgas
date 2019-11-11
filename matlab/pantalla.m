@@ -48,8 +48,11 @@ handles.timer = timer('Name','MyTimer',               ...
                       'ExecutionMode','fixedSpacing', ...
                       'TimerFcn',{@timerCallback,hObject}); 
        
-% Valor por defecto:
+% Valores por defecto de TC y m
+% TC valor traccion/compresion para tipo de esfuerzos
+% m valor para popupmenu
 handles.TC = 'Traccion';
+handles.m=1;
                   
 % Update handles structure
 guidata(hObject, handles);
@@ -70,10 +73,6 @@ axes(handles.foto);
 imshow('puente.jpg');
 axis equal;
 
-% Tabla de deformaciones, tensiones y axiles aparece vacia 
-datos=[];
-set(handles.tabla,'data',datos);
-
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 end
@@ -84,30 +83,12 @@ function tipo_esfuerzos_SelectionChangedFcn(hObject, ~, handles)
 
 % Muestro en la grafica de la estructura del puente barras sometidas a
 % traccion o compresion marcandolas de color morado
-% cg vector deformaciones medidas por las galgas en uE
 % TC variable con valor "Traccion" o "Compresion" segun el boton que este
 % presionado
 handles.TC=get(hObject, 'String');
 actualiza_grafica_barras(handles);
 end
 
-function actualiza_grafica_barras(handles)
-    global cg;
-
-    if (length(cg)<2)
-        return
-    end
-    
-    hold off
-    axes(handles.grafica);
-    switch handles.TC
-    case 'Traccion'
-            traccion(cg);   % Ejecuto script
-        case 'Compresion'
-            compresion(cg); % Ejecuto script 
-    end
-    axis equal;
-end
 
 % --- Funcion que se ejecuta al cambiar valores en popupmenu
 function popupmenu_Callback(hObject, ~, handles)
@@ -188,6 +169,34 @@ end
 if(m==3)
     datos=N;    % Obtengo valores de axiles
 end
+end
+
+
+% --- Funcion que cambia color barras segun si estan sometidas a T/C
+function actualiza_grafica_barras(handles)
+% Muestro en la grafica de la estructura del puente barras sometidas a
+% traccion o compresion marcandolas de color morado
+% cg vector deformaciones medidas por las galgas en uE
+% TC variable con valor "Traccion" o "Compresion" segun el boton que este
+% presionado
+global cg;
+
+% compruebo longitudo del vector cg, si no es correcto no continua
+% ejecutando el programa
+if (length(cg)<2)
+    return
+end
+    
+cla;
+axes(handles.grafica);
+switch handles.TC
+    case 'Traccion'
+          traccion(cg);   % Ejecuto script
+    case 'Compresion'
+          compresion(cg); % Ejecuto script 
+end
+    
+    axis equal;
 end
 
 
