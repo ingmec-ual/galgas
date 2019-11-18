@@ -106,6 +106,9 @@ function medir_Callback(~, ~, handles)
 % Inicia el temporizador
 start(handles.timer);
 
+% Desactiva el boton de medir 
+set(handles.medir, 'Enable', 'off');
+
 end
 
 
@@ -136,6 +139,9 @@ axes(handles.grafica);
 cla;
 grafica_puente;
 axis equal;
+
+% Activa el boton de medir 
+set(handles.medir, 'Enable', 'on');
 end
 
 %------------------------------------------------------------------------
