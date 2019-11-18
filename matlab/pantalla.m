@@ -50,10 +50,9 @@ handles.timer = timer('Name','MyTimer',               ...
        
 % Valores por defecto de TC y m
 % TC valor traccion/compresion para tipo de esfuerzos
-% m valor para popupmenu
+% x valor para popupmenu
 handles.TC = 'Traccion';
-handles.m=1;
-                  
+handles.x = 1;                  
 % Update handles structure
 guidata(hObject, handles);
 end
@@ -95,12 +94,9 @@ function popupmenu_Callback(hObject, ~, handles)
 
 % Muestra en la tabla los valores de deformaciones, axiles y tensiones
 % correspondientes a cada barra segun se selecciona en el popupmenu
-global datos;
-global m;
 
-m=get(hObject,'Value');
-ejecuto_popupmenu;
-set(handles.tabla,'data', datos);
+handles.x=get(hObject,'Value');
+ejecuto_popupmenu(handles);
 end
 
 
@@ -109,6 +105,7 @@ function medir_Callback(~, ~, handles)
 
 % Inicia el temporizador
 start(handles.timer);
+
 end
 
 
@@ -146,7 +143,7 @@ end
 % ---MODULOS---
 
 % --- Funcion que se ejecuta al llamar al popupmenu
-function ejecuto_popupmenu
+function ejecuto_popupmenu(handles)
 
 % Muestra en la tabla los valores de deformaciones, axiles y tensiones
 % correspondientes a cada barra segun se selecciona en el popupmenu
@@ -154,21 +151,26 @@ function ejecuto_popupmenu
 % t vector tensiones en MPa
 % N vector axiles en N
 % datos valores que se insertan en la tabla
-global m;
-global cg;
 global t;
 global N;
-global datos;
 
-if(m==1)
-    datos=cg;   % Obtengo valores de deformacion 
+% compruebo longitudo del vector cg, si no es correcto no continua
+% ejecutando el programa
+if (length(handles.cg)<2)
+    return
 end
-if(m==2)
-    datos=t;    % Obtengo valores de tension
+%datos=[];
+switch handles.x
+    case 1
+        set(handles.tabla,'data', handles.cg);  % Obtengo valores de deformacion 
+       
+    case 2
+        set(handles.tabla,'data', t);   % Obtengo valores de tension 
+        
+    case 3
+        set(handles.tabla,'data', N);   % Obtengo valores de axiles
 end
-if(m==3)
-    datos=N;    % Obtengo valores de axiles
-end
+
 end
 
 
@@ -179,21 +181,20 @@ function actualiza_grafica_barras(handles)
 % cg vector deformaciones medidas por las galgas en uE
 % TC variable con valor "Traccion" o "Compresion" segun el boton que este
 % presionado
-global cg;
 
 % compruebo longitudo del vector cg, si no es correcto no continua
 % ejecutando el programa
-if (length(cg)<2)
+if (length(handles.cg)<2)
     return
 end
     
-cla;
 axes(handles.grafica);
+cla;
 switch handles.TC
     case 'Traccion'
-          traccion(cg);   % Ejecuto script
+          traccion(handles.cg);   % Ejecuto script
     case 'Compresion'
-          compresion(cg); % Ejecuto script 
+          compresion(handles.cg); % Ejecuto script 
 end
     
     axis equal;
@@ -214,32 +215,25 @@ end
 % TC variable con valor "Traccion" o "Compresion"
 % texto variable contiene texto con valor peso que se impreme en pantalla
 handles = guidata(hFigure);
-global C;
-global cg;
-global p;
 global t;
 global N;
-global K;
-global F;
-global datos;
-global texto;
 
 % --- Calculo el peso que hay sobre el puente. --------------------------
 
 C=casos;    % Ejecuto script
-cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
+handles.cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
 % Sumar ruido aleatorio (mientras no se mida del real)
-cg = cg + randn(size(cg,1),size(cg,2))*0.1;
+handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;
 
 % Calculo la posicion sobre el puente 
-p=posicion(cg,C);
+p=posicion(handles.cg,C);
 % Muestro en pantalla la posicion en la que se encuentra la persona
 img=imread(sprintf('caso%d.jpg',p));
 imshow(img,'Parent',handles.foto);
 axis equal;
 
 % Calculo el peso
-t=calculo_tension(cg);
+t=calculo_tension(handles.cg);
 N=calculo_axiles(t);
 K=constante();
 F=calculo_peso(N,K,p);
@@ -249,8 +243,7 @@ texto=sprintf('Peso: %5.1f Kg',F);
 set(handles.peso,'String',texto);
 
 % --- Muestro los valores actuales del popupmenu------------------------
-ejecuto_popupmenu;
-set(handles.tabla,'data', datos);
+ejecuto_popupmenu(handles);
 
 % Actualizo seleccion de TC:
 actualiza_grafica_barras(handles);
