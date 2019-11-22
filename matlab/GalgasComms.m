@@ -1,4 +1,4 @@
-classdef GalgasComms
+classdef GalgasComms < handle
     %GALGASCOMMS Clase para comunicarse con las placas del puente.
     % JLBC 2019 @ UAL
     %
@@ -18,8 +18,9 @@ classdef GalgasComms
     methods (Access = public)
         % Constructor:
         function obj = GalgasComms(serialPortName)
-            obj.sPort = serial(serialPortName,'BaudRate',115200);
+            obj.sPort = serial(serialPortName,'BaudRate',9600);
             fopen(obj.sPort);
+            obj.internal_enable_rx();
         end
         
         
@@ -32,11 +33,25 @@ classdef GalgasComms
     
     methods (Access = public)
         function internal_write(obj, text)
-            obj.sPort.RequestToSend='off';
+            obj.internal_enable_tx();
             fprintf(obj.sPort,text);
-            obj.sPort.RequestToSend='on';
+            obj.internal_enable_rx();
             pause(0.05)            
         end        
+        
+        function [text] = internal_read(obj)
+            obj.internal_enable_rx();
+            text = fgetl(obj.sPort);
+        end        
+
+        function internal_enable_tx(obj)
+            obj.sPort.RequestToSend='off';
+        end        
+        function internal_enable_rx(obj)
+            obj.sPort.RequestToSend='on';
+        end        
+        
+        
     end
     
 end

@@ -17,6 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+// Firmware designed for ATMEGA328P
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "MCP342X.h"
@@ -24,6 +26,9 @@
 // LEDs: 
 constexpr int LED1_PIN = 9; // uC pin 13, PB1
 constexpr int LED2_PIN = 10; // uC pin 14, PB2
+
+constexpr int SERIAL_DE_PIN  = 2; // uC pin 32, PD2
+constexpr int SERIAL_nRE_PIN = 3; // uC pin 1, PD3
 
 // The ADC:
 MCP342X adc;
@@ -38,7 +43,8 @@ double STRAIN_TO_PWM_CONST = 255.5/ (0.3 * ((2<<15 - 1) / 2.5));
 
 // func. decls:
 void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
-
+void rs485_enable_tx();
+void rs485_enable_rx();
 
 void setup()
 {
@@ -51,14 +57,27 @@ void setup()
 	// Use max I2C speed (400 kHz)
 	TWBR = 12;
 
+	// Configure RS485 control outputs:
+	pinMode(SERIAL_DE_PIN, OUTPUT);
+	pinMode(SERIAL_nRE_PIN, OUTPUT);
+	rs485_enable_rx();
+
 	// Init serial port:
 	Serial.begin(9600);
 
 	// wait for Serial comms to become ready
 	while (!Serial) {}
-		
-	Serial.println("# Didactic Strain Gauges-LED System");
-	Serial.println("# System is up and ready!");
+	// Serial.println("xxx");
+
+
+/*
+	rs485_enable_tx();
+	while (1)
+	{
+		Serial.println("ABCD");
+		delay(1000);
+	}
+	*/
 }
 
 void loop()
@@ -67,11 +86,11 @@ void loop()
 	// --------------------------------------------------
 	if (!adc_init_ok)
 	{
-		Serial.println("# Testing ADC connection...");
+		//Serial.println("# Testing ADC connection...");
 		adc_init_ok = adc.testConnection();
 		if (adc_init_ok)
 		{
-			Serial.println("# MCP342X connection successful!");
+			//Serial.println("# MCP342X connection successful!");
 
 			adc.configure(
 				MCP342X_MODE_CONTINUOUS |
@@ -92,15 +111,14 @@ void loop()
 				adc.startConversion();
 				adc.getResult(&adc_zero_strain_offset);
 			}
-			Serial.print("# Using ADC offset value=");
-			Serial.println(adc_zero_strain_offset);
-
-			Serial.println("# Entering main program...");
+			//Serial.print("# Using ADC offset value=");
+			//Serial.println(adc_zero_strain_offset);
+			//Serial.println("# Entering main program...");
 		}
 		else
 		{
-			Serial.println("# ***MCP342X connection failed****!");
-			Serial.println("# Retrying in one second...");
+			//Serial.println("# ***MCP342X connection failed****!");
+			//Serial.println("# Retrying in one second...");
 			delay(1000);
 			return;
 		}
@@ -129,6 +147,11 @@ void loop()
 	// TODO: positive / negative, one LED or the other one.
 	analogWrite(is_negative ? LED2_PIN : LED1_PIN, pwm_value);
 
+	rs485_enable_tx();
+	Serial.print("strain=");
+	Serial.println(real_strain);
+	rs485_enable_rx();
+
 }
 
 void do_led_ramp_up_down(int led_id, int delay_speed_ms)
@@ -146,4 +169,16 @@ void do_led_ramp_up_down(int led_id, int delay_speed_ms)
 		delay(delay_speed_ms);
 	}
 
+}
+
+void rs485_enable_tx()
+{
+	digitalWrite(SERIAL_DE_PIN, true);
+	digitalWrite(SERIAL_nRE_PIN, true);
+}
+
+void rs485_enable_rx()
+{
+	digitalWrite(SERIAL_DE_PIN, false);
+	digitalWrite(SERIAL_nRE_PIN, false);
 }
