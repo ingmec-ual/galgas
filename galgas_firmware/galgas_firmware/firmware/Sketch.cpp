@@ -18,12 +18,20 @@
 */
 
 // Firmware designed for ATMEGA328P
+// Note: to enable sprintf() of doubles/floats, link with these flags:
+// -Wl,-u,vfprintf -lprintf_flt -lm
 
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <Wire.h>
 #include "MCP342X.h"
 
-// LEDs: 
+// Uncomment to enable sending debug text messages to the serial console.
+// do NOT leave enabled for production, since several devices would try 
+// to write simultaneously to the RS485 bus without arbitration.
+//#define SERIAL_DEBUG_MSGS
+
+// LEDs:
 constexpr int LED1_PIN = 9; // uC pin 13, PB1
 constexpr int LED2_PIN = 10; // uC pin 14, PB2
 
@@ -31,20 +39,31 @@ constexpr int SERIAL_DE_PIN  = 2; // uC pin 32, PD2
 constexpr int SERIAL_nRE_PIN = 3; // uC pin 1, PD3
 
 // The ADC:
-MCP342X adc;
-bool adc_init_ok = false;
-const auto ADC_GAIN = MCP342X_GAIN_1X;
+static MCP342X adc;
+static bool adc_init_ok = false;
+static const auto ADC_GAIN = MCP342X_GAIN_1X;
+static uint8_t MY_ID = 0xff; // My unique board ID, stored in EEPROM
 
 // The residual strain, acquired after reset:
-int16_t adc_zero_strain_offset = 0;
+static int16_t adc_zero_strain_offset = 0;
+
+// Last measured strain, in ADC bit units (after offset compensation):
+static int32_t measured_real_strain = 0;
 
 // Calculated such as V_adc=0.3 ==> 100% of PWM LED output
-double STRAIN_TO_PWM_CONST = 255.5/ (0.3 * ((2<<15 - 1) / 2.5));
+static double STRAIN_TO_PWM_CONST = 255.5/ (0.3 * ((2<<15 - 1) / 2.5));
+
 
 // func. decls:
-void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
-void rs485_enable_tx();
-void rs485_enable_rx();
+static void process_sensors_leds();
+static void process_command(const char*cmd);
+static void do_led_ramp_up_down(int led_id, int delay_speed_ms = 6);
+static void rs485_enable_tx();
+static void rs485_enable_rx();
+static void rs485_send_string(const char* s);
+static uint8_t id_read(); // Read "my ID" from EEPROM
+static void id_write(uint8_t id); // write "my ID" to EEPROM
+
 
 void setup()
 {
@@ -57,27 +76,22 @@ void setup()
 	// Use max I2C speed (400 kHz)
 	TWBR = 12;
 
+	// Read ID from eeprom
+	MY_ID = id_read();
+
 	// Configure RS485 control outputs:
 	pinMode(SERIAL_DE_PIN, OUTPUT);
 	pinMode(SERIAL_nRE_PIN, OUTPUT);
 	rs485_enable_rx();
 
 	// Init serial port:
-	Serial.begin(9600);
+	Serial.begin(115200);
+
+	// read timeout (ms)
+	Serial.setTimeout(2);
 
 	// wait for Serial comms to become ready
 	while (!Serial) {}
-	// Serial.println("xxx");
-
-
-/*
-	rs485_enable_tx();
-	while (1)
-	{
-		Serial.println("ABCD");
-		delay(1000);
-	}
-	*/
 }
 
 void loop()
@@ -86,11 +100,16 @@ void loop()
 	// --------------------------------------------------
 	if (!adc_init_ok)
 	{
-		//Serial.println("# Testing ADC connection...");
+#ifdef SERIAL_DEBUG_MSGS
+		rs485_send_string("# Testing ADC connection...");
+#endif
+
 		adc_init_ok = adc.testConnection();
 		if (adc_init_ok)
 		{
-			//Serial.println("# MCP342X connection successful!");
+#ifdef SERIAL_DEBUG_MSGS
+			rs485_send_string("# MCP342X connection successful!");
+#endif
 
 			adc.configure(
 				MCP342X_MODE_CONTINUOUS |
@@ -99,9 +118,14 @@ void loop()
 				ADC_GAIN
 				);
 
+#ifdef SERIAL_DEBUG_MSGS
+			rs485_enable_tx();
 			Serial.print("# ADC config register=");
 			Serial.println(adc.getConfigRegShdw(), HEX);
-			
+			Serial.flush();
+			rs485_enable_rx();
+#endif
+
 			// Read a few samples (a discard them) waiting for the 
 			// analog value to stabilize after reset, then take it as 
 			// the "residual strain" offset value:
@@ -111,32 +135,47 @@ void loop()
 				adc.startConversion();
 				adc.getResult(&adc_zero_strain_offset);
 			}
-			//Serial.print("# Using ADC offset value=");
-			//Serial.println(adc_zero_strain_offset);
-			//Serial.println("# Entering main program...");
+
+#ifdef SERIAL_DEBUG_MSGS
+			rs485_enable_tx();
+			Serial.print("# Using ADC offset value=");
+			Serial.println(adc_zero_strain_offset);
+			Serial.flush();
+			rs485_enable_rx();
+#endif
 		}
 		else
 		{
-			//Serial.println("# ***MCP342X connection failed****!");
-			//Serial.println("# Retrying in one second...");
+#ifdef SERIAL_DEBUG_MSGS
+			rs485_send_string("# MCP342X connection failed! Retrying in 1 second...");
+#endif
 			delay(1000);
 			return;
 		}
 	}
 	
-	// Main task: read ADC and flash LEDs accordingly
-	// --------------------------------------------------
+
+	// Main ADC reading task:
+	process_sensors_leds();
+
+	// check for commands from the PC:
+	String sCmd = Serial.readStringUntil('\n');
+	if (sCmd.length()>0)
+		process_command(sCmd.c_str());
+}
+
+// Main task: read ADC and flash LEDs accordingly
+void process_sensors_leds()
+{
 	int16_t  adc_value;
 	adc.startConversion();
 	adc.getResult(&adc_value);
 	
 	// Strain is measured - offset (residual structural strain)
-	const int32_t real_strain = adc_value - adc_zero_strain_offset;
-	
-	// TODO: Convert to actual strain value.
+	measured_real_strain = adc_value - adc_zero_strain_offset;
 	
 	// Convert to PWM (0-255)
-	double pwm_value_f= STRAIN_TO_PWM_CONST * real_strain;
+	double pwm_value_f= STRAIN_TO_PWM_CONST * measured_real_strain;
 
 	// Saturate:
 	const bool is_negative = (pwm_value_f<0);
@@ -146,13 +185,8 @@ void loop()
 	
 	// TODO: positive / negative, one LED or the other one.
 	analogWrite(is_negative ? LED2_PIN : LED1_PIN, pwm_value);
-
-	rs485_enable_tx();
-	Serial.print("strain=");
-	Serial.println(real_strain);
-	rs485_enable_rx();
-
 }
+
 
 void do_led_ramp_up_down(int led_id, int delay_speed_ms)
 {
@@ -181,4 +215,147 @@ void rs485_enable_rx()
 {
 	digitalWrite(SERIAL_DE_PIN, false);
 	digitalWrite(SERIAL_nRE_PIN, false);
+}
+
+void rs485_send_string(const char* s)
+{
+	rs485_enable_tx();
+	Serial.println(s);
+	Serial.flush();
+	rs485_enable_rx();
+}
+
+// Read "my ID" from EEPROM
+uint8_t id_read()
+{
+	return EEPROM.read(0x00);
+}
+
+// write "my ID" to EEPROM
+void id_write(uint8_t id)
+{
+	EEPROM.write(0x00,id);
+}
+
+// Forward declaration of command functions:
+static void do_cmd_id();
+static void do_cmd_get(const char* varname);
+static void do_cmd_set(const char* varname, double value);
+static void do_cmd_setid(uint8_t new_id);
+
+// Checks whether "str" starts with "substr"
+static inline bool startsWith(const char* str, const char* substr)
+{
+	return !strncasecmp(str,substr, strlen(substr));
+}
+
+/* Format of commands:
+*
+* TO <ID> <CMD> <ARGS...>
+*
+*/
+void process_command(const char*cmd)
+{
+	// Windows may be slow to reset the RTS signal so the hardware RS485 board parses our sent data, 
+	// so make sure of inserting a "large" delay before we transmit anything:
+	delay(10); // ms
+
+	const auto len = strlen(cmd);
+	if (len<3)
+	{
+		// wrong command? corrupt data?
+		return;
+	}
+
+	if (!startsWith(cmd,"TO "))
+	{
+		rs485_send_string("does not start TO\n");
+		return;
+	}
+
+	int target_id = 0xEE; // init to invalid value
+	if (!sscanf(cmd+3,"%i",&target_id))
+	{
+		// Couldn't parse. Don't answer with an error code since we were not sure 
+		// about whether the message was sent to this board (!).
+		return;
+	}
+
+	if (target_id!=MY_ID)
+	{
+		// silently ignore this commands: it's not for us.
+		return;
+	}
+
+	// advance cmd pointer to the next useful position:
+	cmd+=3;
+	while (*cmd!=' ')
+	{
+		if (*cmd=='\0') return;
+		++cmd;
+	}
+	// Start with the next non blank char:
+	cmd++;
+
+	if (!strncmp(cmd,"ID",2))
+	{
+		return do_cmd_id();
+	}
+	if (!strncmp(cmd,"SETID ",6))
+	{
+		unsigned int new_id=0;
+		if (1==sscanf(cmd+6,"%u",&new_id))
+		{
+			do_cmd_setid(new_id);
+			return rs485_send_string("OK|ID changed.\n");
+		}
+		else
+		{
+			return rs485_send_string("ERROR|Cannot parse new ID value\n");
+		}
+	}
+	if (!strncmp(cmd,"GET ",4))
+	{
+		return do_cmd_get(cmd+4);
+	}
+
+	char s[60];
+	sprintf(s,"ERROR|Unrecognized command: `%.20s`\n", cmd);
+	rs485_send_string(s);
+}
+
+void do_cmd_id()
+{
+	char s[60];
+	sprintf(s,"OK|GalgasDidactivas ID=%u Build: " __TIMESTAMP__  "\n", id_read());
+	rs485_send_string(s);
+}
+
+
+void do_cmd_setid(uint8_t new_id)
+{
+	id_write(new_id);
+	MY_ID = new_id;
+}
+
+void do_cmd_get(const char* varname)
+{
+	char s[60];
+	if (startsWith(varname,"STRAIN"))
+	{
+		sprintf(s,"OK|%u\n", measured_real_strain);
+		return rs485_send_string(s);
+	}
+	if (startsWith(varname,"OFFSET"))
+	{
+		sprintf(s,"OK|%u\n", adc_zero_strain_offset);
+		return rs485_send_string(s);
+	}
+	if (startsWith(varname,"PWM_CONST"))
+	{
+		sprintf(s,"OK|%i\n", static_cast<int>(STRAIN_TO_PWM_CONST*10000));
+		return rs485_send_string(s);
+	}
+
+	rs485_send_string("ERROR|GET: Unrecognized variable name\n");
 }
