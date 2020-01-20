@@ -85,10 +85,10 @@ void setup()
 	rs485_enable_rx();
 
 	// Init serial port:
-	Serial.begin(115200);
+	Serial.begin(9600);
 
 	// read timeout (ms)
-	Serial.setTimeout(2);
+	Serial.setTimeout(5);
 
 	// wait for Serial comms to become ready
 	while (!Serial) {}
@@ -159,9 +159,20 @@ void loop()
 	process_sensors_leds();
 
 	// check for commands from the PC:
+	int aval = Serial.available();
+	if (aval)
+	{
+		char s[70];
+		char c =Serial.read();
+		sprintf(s,"Aval=%i c='%c'",aval,c);
+		rs485_send_string(s);
+	}
+	
 	String sCmd = Serial.readStringUntil('\n');
-	if (sCmd.length()>0)
-		process_command(sCmd.c_str());
+	if (sCmd.length()>2 && sCmd[0]!='R' && sCmd[1]!='X')
+	{
+		//process_command(sCmd.c_str());
+	}
 }
 
 // Main task: read ADC and flash LEDs accordingly
@@ -220,6 +231,7 @@ void rs485_enable_rx()
 void rs485_send_string(const char* s)
 {
 	rs485_enable_tx();
+	Serial.print("TX:");
 	Serial.println(s);
 	Serial.flush();
 	rs485_enable_rx();
@@ -259,6 +271,14 @@ void process_command(const char*cmd)
 	// Windows may be slow to reset the RTS signal so the hardware RS485 board parses our sent data, 
 	// so make sure of inserting a "large" delay before we transmit anything:
 	delay(10); // ms
+
+    {
+	    char s[70];
+	    sprintf(s,"Veo: '%s'",cmd);
+	    rs485_send_string(s);
+//	    return;
+    }
+
 
 	const auto len = strlen(cmd);
 	if (len<3)

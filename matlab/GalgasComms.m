@@ -18,7 +18,7 @@ classdef GalgasComms < handle
     methods (Access = public)
         % Constructor:
         function obj = GalgasComms(serialPortName)
-            obj.sPort = serial(serialPortName,'BaudRate',115200);
+            obj.sPort = serial(serialPortName,'BaudRate',9600);
             set(obj.sPort, 'Timeout', 1.0);
             fopen(obj.sPort);
             obj.internal_enable_rx();
@@ -43,6 +43,9 @@ classdef GalgasComms < handle
         function [text] = internal_read(obj)
             obj.internal_enable_rx();
             text = fgetl(obj.sPort);
+            if (text==-1)
+                text='';
+            end                
         end        
 
         function internal_enable_tx(obj)
