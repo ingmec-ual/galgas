@@ -85,13 +85,14 @@ void setup()
 	rs485_enable_rx();
 
 	// Init serial port:
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	// read timeout (ms)
 	Serial.setTimeout(5);
 
 	// wait for Serial comms to become ready
 	while (!Serial) {}
+		
 }
 
 void loop()
@@ -159,19 +160,10 @@ void loop()
 	process_sensors_leds();
 
 	// check for commands from the PC:
-	int aval = Serial.available();
-	if (aval)
-	{
-		char s[70];
-		char c =Serial.read();
-		sprintf(s,"Aval=%i c='%c'",aval,c);
-		rs485_send_string(s);
-	}
-	
 	String sCmd = Serial.readStringUntil('\n');
-	if (sCmd.length()>2 && sCmd[0]!='R' && sCmd[1]!='X')
+	if (sCmd.length()>2)
 	{
-		//process_command(sCmd.c_str());
+		process_command(sCmd.c_str());
 	}
 }
 
@@ -270,15 +262,7 @@ void process_command(const char*cmd)
 {
 	// Windows may be slow to reset the RTS signal so the hardware RS485 board parses our sent data, 
 	// so make sure of inserting a "large" delay before we transmit anything:
-	delay(10); // ms
-
-    {
-	    char s[70];
-	    sprintf(s,"Veo: '%s'",cmd);
-	    rs485_send_string(s);
-//	    return;
-    }
-
+	delay(30); // ms
 
 	const auto len = strlen(cmd);
 	if (len<3)
@@ -373,7 +357,7 @@ void do_cmd_get(const char* varname)
 	}
 	if (startsWith(varname,"PWM_CONST"))
 	{
-		sprintf(s,"OK|%i\n", static_cast<int>(STRAIN_TO_PWM_CONST*10000));
+		sprintf(s,"OK|%u\n", static_cast<unsigned int>(STRAIN_TO_PWM_CONST*1000U));
 		return rs485_send_string(s);
 	}
 

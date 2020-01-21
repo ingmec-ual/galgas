@@ -18,7 +18,7 @@ classdef GalgasComms < handle
     methods (Access = public)
         % Constructor:
         function obj = GalgasComms(serialPortName)
-            obj.sPort = serial(serialPortName,'BaudRate',9600);
+            obj.sPort = serial(serialPortName,'BaudRate',115200);
             set(obj.sPort, 'Timeout', 1.0);
             fopen(obj.sPort);
             obj.internal_enable_rx();
@@ -35,9 +35,10 @@ classdef GalgasComms < handle
     methods (Access = public)
         function internal_write(obj, text)
             obj.internal_enable_tx();
+            pause(0.02);
             fprintf(obj.sPort,text);
+            pause(0.02);
             obj.internal_enable_rx();
-            pause(0.05); % to give time to RTS to actually work
         end        
         
         function [text] = internal_read(obj)
