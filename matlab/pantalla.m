@@ -48,11 +48,12 @@ handles.timer = timer('Name','MyTimer',               ...
                       'ExecutionMode','fixedSpacing', ...
                       'TimerFcn',{@timerCallback,hObject}); 
        
-% Valores por defecto de TC y m
+% Valores por defecto de TC y x
 % TC valor traccion/compresion para tipo de esfuerzos
 % x valor para popupmenu
 handles.TC = 'Traccion';
-handles.x = 1;                  
+handles.x = 1;
+handles.cg=[];
 % Update handles structure
 guidata(hObject, handles);
 end
@@ -96,6 +97,9 @@ function popupmenu_Callback(hObject, ~, handles)
 % correspondientes a cada barra segun se selecciona en el popupmenu
 
 handles.x=get(hObject,'Value');
+% Update handles structure
+guidata(hObject, handles);
+
 ejecuto_popupmenu(handles);
 end
 
@@ -284,5 +288,3 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 end
-
-

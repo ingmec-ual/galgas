@@ -2,7 +2,8 @@ close all;
 clear;
 clear class;
 
-s=GalgasComms('COM7');
+% Nombre del puerto serie: terminal
+s=GalgasComms('/dev/tty.usbserial-FT9PCFYR');
 
 %cmd='TO 1 ID\n';
 %cmd='TO 1 GET STRAIN\n';
