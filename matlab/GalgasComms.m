@@ -35,14 +35,18 @@ classdef GalgasComms < handle
     methods (Access = public)
         function internal_write(obj, text)
             obj.internal_enable_tx();
+            pause(0.02);
             fprintf(obj.sPort,text);
+            pause(0.02);
             obj.internal_enable_rx();
-            pause(0.05); % to give time to RTS to actually work
         end        
         
         function [text] = internal_read(obj)
             obj.internal_enable_rx();
             text = fgetl(obj.sPort);
+            if (text==-1)
+                text='';
+            end                
         end        
 
         function internal_enable_tx(obj)
