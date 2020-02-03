@@ -212,7 +212,7 @@ end
 
 
 %--- Funcion que se repite mientras el temporizador esta en marcha
- function timerCallback(hObject, eventdata, hFigure)
+ function timerCallback(~, ~, hFigure)
  
 % C matriz de casos 
 % cg vector deformaciones medidas por las galgas en uE
