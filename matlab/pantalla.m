@@ -73,6 +73,13 @@ axes(handles.foto);
 imshow('puente.jpg');
 axis equal;
 
+% Pregunta por el puerto de serie al que va conectado
+% nomter Nombre del puerto serie introducido por teclado
+% s Nombre del puerto serie: terminal
+nomter=inputdlg({'Introduzca nombre del puerto serie:'});
+s=GalgasComms('/dev/tty.usbserial-FT9PCFYR');
+s=GalgasComms('nomter');
+
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 end
