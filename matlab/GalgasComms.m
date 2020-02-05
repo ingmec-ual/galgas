@@ -15,6 +15,7 @@ classdef GalgasComms < handle
         sPort;  % Serial port object
     end
     
+   
     methods (Access = public)
         % Constructor:
         function obj = GalgasComms(serialPortName)
@@ -28,8 +29,22 @@ classdef GalgasComms < handle
         % Destructor
         function delete(obj)
             fclose(obj.sPort);
-       end
+        end
 
+        % Get the self-description text from a node with ID=id
+        function s = getID(self, id)
+            cmd=sprintf('TO %i ID\n',id);
+            internal_write(self, cmd);
+            s = internal_read(self);
+        end
+        
+        % Get the last strain value from a node with ID=id
+        function s = getStrain(self, id)
+            cmd=sprintf('TO %i GET STRAIN\n',id);
+            internal_write(self, cmd);
+            s = internal_read(self);
+        end
+        
     end
     
     methods (Access = public)

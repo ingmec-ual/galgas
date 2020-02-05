@@ -2,12 +2,17 @@ close all;
 clear;
 clear class;
 
-%<<<<<<< HEAD
+%serialPortName='/dev/tty.usbserial-FT9PCFYR';
+serialPortName='COM3';
+
 % Nombre del puerto serie: terminal
-s=GalgasComms('/dev/tty.usbserial-FT9PCFYR');
-%=======
-s=GalgasComms('COM3');
-%>>>>>>> 58395c001b9a7617f0259f91f4de37680fd3c08b
+s=GalgasComms(serialPortName);
+
+%s.getID(1)
+eps = s.getStrain(1)
+
+clear
+return;
 
 %cmd='TO 1 ID\n';
 %cmd='TO 255 SETID 1\n';
