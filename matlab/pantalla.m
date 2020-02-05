@@ -73,27 +73,6 @@ axes(handles.foto);
 imshow('puente.jpg');
 axis equal;
 
-% Pregunta por el puerto de serie al que va conectado
-% nomter Nombre del puerto serie introducido por teclado
-% s Nombre del puerto serie: terminal
-ans=questdlg('Desea modificar el nombre del puerto serie?',...
-             'Menu',...
-             'Si','No','No');
-switch ans
-    case 'Si'
-        handles.nomter=inputdlg({'Introduzca nombre del puerto serie:'});
-        handles.s=GalgasComms('nomter');
-    case 'No'
-        
-        if (handles.nomter==str);
-           ans=questdlg('Desea modificar el nombre del puerto serie?',...
-                        'Menu',...
-                        'Si','No','No');
-        end
-        handles.s=GalgasComms('nomter');
-end
-
-
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 end
@@ -308,4 +287,75 @@ function popupmenu_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+end
+
+
+
+function edCOM_Callback(hObject, eventdata, handles)
+% hObject    handle to edCOM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edCOM as text
+%        str2double(get(hObject,'String')) returns contents of edCOM as a double
+
+end
+
+% --- Executes during object creation, after setting all properties.
+function edCOM_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edCOM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+end
+
+% --- Executes on button press in btnConnect.
+function btnConnect_Callback(hObject, eventdata, handles)
+% hObject    handle to btnConnect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+try
+    handles.nomter=get(handles.edCOM,'String');
+    handles.s=GalgasComms(handles.nomter);
+
+    if (1) % TODO: Comprobar que no haya habido errores?
+        % Activa el boton de medir 
+        set(handles.btnConnect, 'Enable', 'off');
+        set(handles.btnDisconnect, 'Enable', 'on');
+        set(handles.medir, 'Enable', 'on');
+    end
+    
+    guidata(hObject,handles);
+catch ME
+    msgbox(ME.message,'Error abriendo puerto serie');
+end
+
+end
+
+% --- Executes on button press in btnDisconnect.
+function btnDisconnect_Callback(hObject, eventdata, handles)
+% hObject    handle to btnDisconnect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+try
+    clear handles.s;
+
+    set(handles.btnConnect, 'Enable', 'on');
+    set(handles.btnDisconnect, 'Enable', 'off');
+    set(handles.medir, 'Enable', 'off');
+    % ...
+
+    guidata(hObject,handles);
+catch ME
+    msgbox(ME.message,'Error abriendo puerto serie');
+end
+
 end
