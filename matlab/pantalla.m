@@ -238,12 +238,12 @@ MEDIR_SISTEMA_REAL=1;
 
 if (MEDIR_SISTEMA_REAL)
     % Lista de placas a leer:
-    IDs=[1];
+    IDs=[4; 11; 12; 16; 17; 18; 19];
 
     handles.cg = leer_galgas(handles.s, IDs);
 else
     % Datos simulados de prueba:
-    handles.cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
+    handles.cg=[-37.0810, 24.7207, 49.4414, -418.6444, -209.3222, 209.3222, -209.3222];
     % Sumar ruido aleatorio (mientras no se mida del real)
     handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;
 end
