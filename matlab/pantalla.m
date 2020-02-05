@@ -110,8 +110,9 @@ function medir_Callback(~, ~, handles)
 % Inicia el temporizador
 start(handles.timer);
 
-% Desactiva el boton de medir 
+% Desactiva el boton de medir y activa el de resetear
 set(handles.medir, 'Enable', 'off');
+set(handles.resetear, 'Enable', 'on');
 
 end
 
@@ -144,8 +145,9 @@ cla;
 grafica_puente;
 axis equal;
 
-% Activa el boton de medir 
+% Activa el boton de medir y desactiva el de resetear
 set(handles.medir, 'Enable', 'on');
+set(handles.resetear, 'Enable', 'off');
 end
 
 %------------------------------------------------------------------------
@@ -169,7 +171,7 @@ global N;
 if (length(handles.cg)<2)
     return
 end
-%datos=[];
+
 switch handles.x
     case 1
         set(handles.tabla,'data', handles.cg);  % Obtengo valores de deformacion 
@@ -231,9 +233,20 @@ global N;
 % --- Calculo el peso que hay sobre el puente. --------------------------
 
 C=casos;    % Ejecuto script
-handles.cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
-% Sumar ruido aleatorio (mientras no se mida del real)
-handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;
+
+MEDIR_SISTEMA_REAL=1;
+
+if (MEDIR_SISTEMA_REAL)
+    % Lista de placas a leer:
+    IDs=[1];
+
+    handles.cg = leer_galgas(handles.s, IDs);
+else
+    % Datos simulados de prueba:
+    handles.cg=[-87.17293736, 116.2305831, 58.11529157,	-984.1815939, -492.0907969,	492.0907969, -492.0907969];
+    % Sumar ruido aleatorio (mientras no se mida del real)
+    handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;
+end
 
 % Calculo la posicion sobre el puente 
 p=posicion(handles.cg,C);
@@ -330,6 +343,8 @@ try
         set(handles.btnConnect, 'Enable', 'off');
         set(handles.btnDisconnect, 'Enable', 'on');
         set(handles.medir, 'Enable', 'on');
+        set(handles.resetear, 'Enable', 'off');
+        
     end
     
     guidata(hObject,handles);
@@ -351,6 +366,7 @@ try
     set(handles.btnConnect, 'Enable', 'on');
     set(handles.btnDisconnect, 'Enable', 'off');
     set(handles.medir, 'Enable', 'off');
+    set(handles.resetear, 'Enable', 'off');
     % ...
 
     guidata(hObject,handles);

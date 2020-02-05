@@ -8,8 +8,10 @@ serialPortName='COM3';
 % Nombre del puerto serie: terminal
 s=GalgasComms(serialPortName);
 
-%s.getID(1)
 eps = s.getStrain(1)
+
+%IDs=[1];
+%cg = leer_galgas(s, IDs)
 
 clear
 return;

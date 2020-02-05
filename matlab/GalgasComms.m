@@ -38,11 +38,16 @@ classdef GalgasComms < handle
             s = internal_read(self);
         end
         
-        % Get the last strain value from a node with ID=id
+        % Get the last strain value from a node with ID=id (in volts)
         function s = getStrain(self, id)
             cmd=sprintf('TO %i GET STRAIN\n',id);
             internal_write(self, cmd);
-            s = internal_read(self);
+            rx = internal_read(self);
+            if (strfind(rx,'TX:OK|')~=1)
+                error('Unexpected received string from uC: "%s"',rx);
+            end
+            K_adc = 1.0/(2^15);
+            s = str2double(rx(7:end))*K_adc;
         end
         
     end

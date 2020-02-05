@@ -354,12 +354,12 @@ void do_cmd_get(const char* varname)
 	char s[60];
 	if (startsWith(varname,"STRAIN"))
 	{
-		sprintf(s,"OK|%u\n", measured_real_strain);
+		sprintf(s,"OK|%i\n", measured_real_strain);
 		return rs485_send_string(s);
 	}
 	if (startsWith(varname,"OFFSET"))
 	{
-		sprintf(s,"OK|%u\n", adc_zero_strain_offset);
+		sprintf(s,"OK|%i\n", adc_zero_strain_offset);
 		return rs485_send_string(s);
 	}
 	if (startsWith(varname,"PWM_CONST"))
