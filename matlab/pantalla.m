@@ -76,9 +76,23 @@ axis equal;
 % Pregunta por el puerto de serie al que va conectado
 % nomter Nombre del puerto serie introducido por teclado
 % s Nombre del puerto serie: terminal
-nomter=inputdlg({'Introduzca nombre del puerto serie:'});
-s=GalgasComms('/dev/tty.usbserial-FT9PCFYR');
-s=GalgasComms('nomter');
+ans=questdlg('Desea modificar el nombre del puerto serie?',...
+             'Menu',...
+             'Si','No','No');
+switch ans
+    case 'Si'
+        handles.nomter=inputdlg({'Introduzca nombre del puerto serie:'});
+        handles.s=GalgasComms('nomter');
+    case 'No'
+        
+        if (handles.nomter==str);
+           ans=questdlg('Desea modificar el nombre del puerto serie?',...
+                        'Menu',...
+                        'Si','No','No');
+        end
+        handles.s=GalgasComms('nomter');
+end
+
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
