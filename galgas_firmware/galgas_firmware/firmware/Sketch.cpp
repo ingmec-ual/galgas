@@ -53,6 +53,8 @@ static int32_t measured_real_strain = 0;
 // Calculated such as V_adc=0.3 ==> 100% of PWM LED output
 static double STRAIN_TO_PWM_CONST = 255.5/ (0.3 * ((2<<15 - 1) / 2.5));
 
+static double threshold_strain_leds = 100;
+
 
 // func. decls:
 static void process_sensors_leds();
@@ -178,7 +180,11 @@ void process_sensors_leds()
 	measured_real_strain = adc_value - adc_zero_strain_offset;
 	
 	// Convert to PWM (0-255)
-	double pwm_value_f= STRAIN_TO_PWM_CONST * measured_real_strain;
+	double pwm_value_f= .0;
+	if (fabs(measured_real_strain)>threshold_strain_leds)
+	{
+		pwm_value_f = STRAIN_TO_PWM_CONST * measured_real_strain;
+	}
 
 	// Saturate:
 	const bool is_negative = (pwm_value_f<0);
@@ -188,6 +194,7 @@ void process_sensors_leds()
 	
 	// TODO: positive / negative, one LED or the other one.
 	analogWrite(is_negative ? LED2_PIN : LED1_PIN, pwm_value);
+	analogWrite(is_negative ? LED1_PIN : LED2_PIN, 0);
 }
 
 
