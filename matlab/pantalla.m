@@ -54,6 +54,8 @@ handles.timer = timer('Name','MyTimer',               ...
 handles.TC = 'Traccion';
 handles.x = 1;
 handles.cg=[];
+handles.bt=0;
+handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
 % Update handles structure
 guidata(hObject, handles);
 end
@@ -104,21 +106,78 @@ ejecuto_popupmenu(handles);
 end
 
 
+% --- Funcion que se ejecuta al presionar boton btnConnect.
+function btnConnect_Callback(hObject, ~, handles)
+
+% Se introduce el nombre del puerto serie al que van conectadas las 
+% placas por pantalla y se conecta, activando los botones de medir
+
+try
+%    handles.nomter=get(handles.edCOM,'String');
+%    handles.s=GalgasComms(handles.nomter);
+
+    set(handles.btnConnect, 'Enable', 'off');
+    set(handles.btnDisconnect, 'Enable', 'on');
+    set(handles.medir, 'Enable', 'on');
+    set(handles.resetear, 'Enable', 'off');
+    
+    guidata(hObject,handles);
+    
+catch ME
+    msgbox(ME.message,'Error abriendo puerto serie');
+end
+
+end
+
+
+% --- Funcion que se ejecuta al presionar boton btnDisconnect.
+function btnDisconnect_Callback(hObject, ~, handles)
+
+% Se desconecta el puerto serie en el que van conectadas las placas
+
+try
+    clear handles.s;
+    
+    resetear_Callback(handles);
+    
+    set(handles.btnConnect, 'Enable', 'on');
+    set(handles.btnDisconnect, 'Enable', 'off');
+    
+    guidata(hObject,handles);
+ 
+catch ME
+    msgbox(ME.message,'Error abriendo puerto serie');
+end
+
+end
+
+
 % --- Funcion que se ejecuta al presionar boton medir
 function medir_Callback(~, ~, handles)
 
 % Inicia el temporizador
 start(handles.timer);
 
-% Desactiva el boton de medir y activa el de resetear
+% Desactiva y activa los botones
 set(handles.medir, 'Enable', 'off');
 set(handles.resetear, 'Enable', 'on');
-
+set(handles.todas, 'Enable', 'on');
+set(handles.b4, 'Enable', 'on');
+set(handles.b11, 'Enable', 'on');
+set(handles.b12, 'Enable', 'on');
+set(handles.b16, 'Enable', 'on');
+set(handles.b17, 'Enable', 'on');
+set(handles.b18, 'Enable', 'on');
+set(handles.b19, 'Enable', 'on');
+set(handles.traccion, 'Enable', 'on');
+set(handles.compresion, 'Enable', 'on');
+set(handles.popupmenu, 'Enable', 'on');
+ 
 end
 
 
 % --- Funcion que se ejecuta al presionar boton resetear.
-function resetear_Callback(~, ~, handles)
+function resetear_Callback(handles)
 
 % Resetea la pantalla de la interfaz
 % Para el temporizador
@@ -145,8 +204,19 @@ cla;
 grafica_puente;
 axis equal;
 
-% Activa el boton de medir y desactiva el de resetear
+% Activa y desactiva los botones
 set(handles.medir, 'Enable', 'on');
+set(handles.todas, 'Enable', 'inactive');
+set(handles.b4, 'Enable', 'inactive');
+set(handles.b11, 'Enable', 'inactive');
+set(handles.b12, 'Enable', 'inactive');
+set(handles.b16, 'Enable', 'inactive');
+set(handles.b17, 'Enable', 'inactive');
+set(handles.b18, 'Enable', 'inactive');
+set(handles.b19, 'Enable', 'inactive');
+set(handles.traccion, 'Enable', 'inactive');
+set(handles.compresion, 'Enable', 'inactive');
+set(handles.popupmenu, 'Enable', 'inactive');
 set(handles.resetear, 'Enable', 'off');
 end
 
@@ -163,8 +233,6 @@ function ejecuto_popupmenu(handles)
 % t vector tensiones en MPa
 % N vector axiles en N
 % datos valores que se insertan en la tabla
-global t;
-global N;
 
 % compruebo longitudo del vector cg, si no es correcto no continua
 % ejecutando el programa
@@ -172,15 +240,25 @@ if (length(handles.cg)<2)
     return
 end
 
+cero=[0 0 0 0 0 0 0];
 switch handles.x
     case 1
-        set(handles.tabla,'data', handles.cg);  % Obtengo valores de deformacion 
+        defor=handles.tbl(1,:);
+        set(handles.tabla,'data', defor); % Obtengo valores de deformacion 
        
     case 2
-        set(handles.tabla,'data', t);   % Obtengo valores de tension 
+        A=handles.tbl(2,:);
+        tension=[cero; A];
+        set(handles.tabla,'data', tension);   % Obtengo valores de tension 
         
     case 3
-        set(handles.tabla,'data', N);   % Obtengo valores de axiles
+        B=handles.tbl(3,:);
+        axil=[cero; cero; B];
+        set(handles.tabla,'data', axil);   % Obtengo valores de axiles
+        
+    case 4
+        total=[handles.tbl];
+        set(handles.tabla,'data', total);   % Obtengo valores de axiles        
 end
 
 end
@@ -188,30 +266,25 @@ end
 
 % --- Funcion que cambia color barras segun si estan sometidas a T/C
 function actualiza_grafica_barras(handles)
+
 % Muestro en la grafica de la estructura del puente barras sometidas a
 % traccion o compresion marcandolas de color morado
 % cg vector deformaciones medidas por las galgas en uE
 % TC variable con valor "Traccion" o "Compresion" segun el boton que este
 % presionado
 
-% compruebo longitudo del vector cg, si no es correcto no continua
-% ejecutando el programa
-if (length(handles.cg)<2)
-    return
-end
-    
-axes(handles.grafica);
-cla;
-switch handles.TC
-    case 'Traccion'
+    axes(handles.grafica);
+    cla;
+    switch handles.TC
+        case 'Traccion'
           traccion(handles.cg);   % Ejecuto script
-    case 'Compresion'
+        case 'Compresion'
           compresion(handles.cg); % Ejecuto script 
-end
+    end
     
-    axis equal;
-end
+        axis equal;
 
+end
 
 %--- Funcion que se repite mientras el temporizador esta en marcha
  function timerCallback(~, ~, hFigure)
@@ -227,16 +300,14 @@ end
 % TC variable con valor "Traccion" o "Compresion"
 % texto variable contiene texto con valor peso que se impreme en pantalla
 handles = guidata(hFigure);
-global t;
-global N;
 
 % --- Calculo el peso que hay sobre el puente. --------------------------
 
 C=casos;    % Ejecuto script
 
-MEDIR_SISTEMA_REAL=1;
+MEDIR_SISTEMA_REAL=3;
 
-if (MEDIR_SISTEMA_REAL)
+if (MEDIR_SISTEMA_REAL==1)
     % Lista de placas a leer:
     IDs=[4; 11; 12; 16; 17; 18; 19];
 
@@ -256,24 +327,214 @@ imshow(img,'Parent',handles.foto);
 axis equal;
 
 % Calculo el peso
-t=calculo_tension(handles.cg);
-N=calculo_axiles(t);
+handles.t=calculo_tension(handles.cg);
+handles.N=calculo_axiles(handles.t);
 K=constante();
-F=calculo_peso(N,K,p);
+F=calculo_peso(handles.N,K,p);
 
 % --- Muestro valores actuales del peso---------------------------------
 texto=sprintf('Peso: %5.1f Kg',F);
 set(handles.peso,'String',texto);
 
-% --- Muestro los valores actuales del popupmenu------------------------
-ejecuto_popupmenu(handles);
-
-% Actualizo seleccion de TC:
+% --- Actualizo seleccion de TC-----------------------------------------   
 actualiza_grafica_barras(handles);
 
 guidata(hFigure,handles);
  end
 
+
+% --- Funcion que se ejecuta al presionar todas.
+function todas_Callback(hObject, ~, handles)
+
+handles.bt=get(hObject,'Value');
+
+switch handles.bt
+    case 1
+    set(handles.b4, 'Value',1);
+    set(handles.b11, 'Value',1);
+    set(handles.b12, 'Value',1);
+    set(handles.b16, 'Value',1);
+    set(handles.b17, 'Value',1);
+    set(handles.b18, 'Value',1);
+    set(handles.b19, 'Value',1);
+    
+    ejecuto_popupmenu(handles);
+    
+    case 0         
+    set(handles.b4, 'Value',0);
+    set(handles.b11, 'Value',0);
+    set(handles.b12, 'Value',0);
+    set(handles.b16, 'Value',0);
+    set(handles.b17, 'Value',0);
+    set(handles.b18, 'Value',0);
+    set(handles.b19, 'Value',0);
+
+end
+
+
+end
+
+% --- Funcion que se ejecuta al presionar b4.
+function b4_Callback(hObject, ~, handles)
+
+handles.b4=get(hObject,'Value');
+switch handles.b4
+    case 1
+       b4g=handles.cg(1);
+       handles.tbl(1,1)=b4g;
+       b4t=handles.t(1);
+       handles.tbl(2,1)=b4t;
+       b4n=handles.N(1);
+       handles.tbl(3,1)=b4n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,1)=0;
+        handles.tbl(2,1)=0;
+        handles.tbl(3,1)=0;
+end
+
+
+end
+
+
+% --- Funcion que se ejecuta al presionar b11.
+function b11_Callback(hObject, ~, handles)
+
+handles.b11=get(hObject,'Value');
+switch handles.b11
+    case 1
+       b11g=handles.cg(2);
+       handles.tbl(1,2)=b11g;
+       b11t=handles.t(1);
+       handles.tbl(2,2)=b11t;
+       b11n=handles.N(2);
+       handles.tbl(3,2)=b11n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,2)=0;
+        handles.tbl(2,2)=0;
+        handles.tbl(3,2)=0;
+end
+
+end
+
+
+% --- Funcion que se ejecuta al presionar b12.
+function b12_Callback(hObject, ~, handles)
+
+handles.b12=get(hObject,'Value');
+switch handles.b12
+    case 1
+       b12g=handles.cg(3);
+       handles.tbl(1,3)=b12g;
+       b12t=handles.t(3);
+       handles.tbl(2,3)=b12t;
+       b12n=handles.N(3);
+       handles.tbl(3,3)=b12n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,3)=0;
+        handles.tbl(2,3)=0;
+        handles.tbl(3,3)=0;
+
+end
+end
+
+
+% --- Funcion que se ejecuta al presionar b16.
+function b16_Callback(hObject, ~, handles)
+
+handles.b16=get(hObject,'Value');
+switch handles.b16
+    case 1
+       b16g=handles.cg(4);
+       handles.tbl(1,4)=b16g;
+       b16t=handles.t(4);
+       handles.tbl(2,4)=b16t;
+       b16n=handles.N(4);
+       handles.tbl(3,4)=b16n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,4)=0;
+        handles.tbl(2,4)=0;
+        handles.tbl(3,4)=0;
+
+end
+end
+
+
+% --- Funcion que se ejecuta al presionar b17.
+function b17_Callback(hObject, ~, handles)
+
+handles.b17=get(hObject,'Value');
+switch handles.b17
+    case 1
+       b17g=handles.cg(5);
+       handles.tbl(1,5)=b17g;
+       b17t=handles.t(5);
+       handles.tbl(2,5)=b17t;
+       b17n=handles.N(5);
+       handles.tbl(3,5)=b17n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,5)=0;
+        handles.tbl(2,5)=0;
+        handles.tbl(3,5)=0;
+end
+end
+
+
+% --- Funcion que se ejecuta al presionar b18.
+function b18_Callback(hObject, ~, handles)
+
+handles.b18=get(hObject,'Value');
+switch handles.b18
+    case 1
+       b18g=handles.cg(6);
+       handles.tbl(1,6)=b18g;
+       b18t=handles.t(6);
+       handles.tbl(2,6)=b18t;
+       b18n=handles.N(6);
+       handles.tbl(3,6)=b18n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,6)=0;
+        handles.tbl(2,6)=0;
+        handles.tbl(3,6)=0;
+
+end
+end
+
+
+% --- Funcion que se ejecuta al presionar b19.
+function b19_Callback(hObject, ~, handles)
+
+handles.b19=get(hObject,'Value');
+switch handles.b19
+    case 1
+       b19g=handles.cg(7);
+       handles.tbl(1,7)=b19g;
+       b19t=handles.t(7);
+       handles.tbl(2,7)=b19t;
+       b19n=handles.N(7);
+       handles.tbl(3,7)=b19n;
+       ejecuto_popupmenu(handles);
+       
+    case 0
+        handles.tbl(1,7)=0;
+        handles.tbl(2,7)=0;
+        handles.tbl(3,7)=0;
+end
+end
+
+
+%-----------------------------------------------------------------------  
  
  % --- Executes during object creation, after setting all properties.
  function peso_CreateFcn(hObject, ~, ~)
@@ -303,8 +564,7 @@ end
 end
 
 
-
-function edCOM_Callback(hObject, eventdata, handles)
+function edCOM_Callback(~, ~, ~)
 % hObject    handle to edCOM (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -315,7 +575,7 @@ function edCOM_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function edCOM_CreateFcn(hObject, eventdata, handles)
+function edCOM_CreateFcn(hObject, ~, ~)
 % hObject    handle to edCOM (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -324,54 +584,6 @@ function edCOM_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
-end
-
-end
-
-% --- Executes on button press in btnConnect.
-function btnConnect_Callback(hObject, eventdata, handles)
-% hObject    handle to btnConnect (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-try
-    handles.nomter=get(handles.edCOM,'String');
-    handles.s=GalgasComms(handles.nomter);
-
-    if (1) % TODO: Comprobar que no haya habido errores?
-        % Activa el boton de medir 
-        set(handles.btnConnect, 'Enable', 'off');
-        set(handles.btnDisconnect, 'Enable', 'on');
-        set(handles.medir, 'Enable', 'on');
-        set(handles.resetear, 'Enable', 'off');
-        
-    end
-    
-    guidata(hObject,handles);
-catch ME
-    msgbox(ME.message,'Error abriendo puerto serie');
-end
-
-end
-
-% --- Executes on button press in btnDisconnect.
-function btnDisconnect_Callback(hObject, eventdata, handles)
-% hObject    handle to btnDisconnect (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-try
-    clear handles.s;
-
-    set(handles.btnConnect, 'Enable', 'on');
-    set(handles.btnDisconnect, 'Enable', 'off');
-    set(handles.medir, 'Enable', 'off');
-    set(handles.resetear, 'Enable', 'off');
-    % ...
-
-    guidata(hObject,handles);
-catch ME
-    msgbox(ME.message,'Error abriendo puerto serie');
 end
 
 end
