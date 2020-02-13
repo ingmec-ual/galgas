@@ -54,8 +54,16 @@ handles.timer = timer('Name','MyTimer',               ...
 handles.TC = 'Traccion';
 handles.x = 1;
 handles.cg=[];
-handles.bt=0;
 handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
+handles.bt=0;
+handles.bot_4=0;
+handles.bot_11=0;
+handles.bot_12=0;
+handles.bot_16=0;
+handles.bot_17=0;
+handles.bot_18=0;
+handles.bot_19=0;
+
 % Update handles structure
 guidata(hObject, handles);
 end
@@ -177,7 +185,7 @@ end
 
 
 % --- Funcion que se ejecuta al presionar boton resetear.
-function resetear_Callback(handles)
+function resetear_Callback(~, ~, handles)
 
 % Resetea la pantalla de la interfaz
 % Para el temporizador
@@ -205,6 +213,15 @@ grafica_puente;
 axis equal;
 
 % Activa y desactiva los botones
+set(handles.todas, 'Value',0);
+set(handles.b4, 'Value',0);
+set(handles.b11, 'Value',0);
+set(handles.b12, 'Value',0);
+set(handles.b16, 'Value',0);
+set(handles.b17, 'Value',0);
+set(handles.b18, 'Value',0);
+set(handles.b19, 'Value',0);
+
 set(handles.medir, 'Enable', 'on');
 set(handles.todas, 'Enable', 'inactive');
 set(handles.b4, 'Enable', 'inactive');
@@ -350,35 +367,81 @@ handles.bt=get(hObject,'Value');
 
 switch handles.bt
     case 1
-    set(handles.b4, 'Value',1);
-    set(handles.b11, 'Value',1);
-    set(handles.b12, 'Value',1);
-    set(handles.b16, 'Value',1);
-    set(handles.b17, 'Value',1);
-    set(handles.b18, 'Value',1);
-    set(handles.b19, 'Value',1);
+        if(handles.bot_4==0)
+            set(handles.b4, 'Value',1);
+        end
+        
+        if(handles.bot_11==0)
+            set(handles.b11, 'Value',1);
+        end
+        
+        if(handles.bot_12==0)
+            set(handles.b12, 'Value',1);
+        end
+        
+        if (handles.bot_16==0)
+            set(handles.b16, 'Value',1);
+        end
+        
+        if(handles.bot_17==0)
+            set(handles.b17, 'Value',1);
+        end
+        
+        if(handles.bot_18==0)
+            set(handles.b18, 'Value',1);
+        end
+        
+        if(handles.bot_19==0)
+            set(handles.b19, 'Value',1);
+        end
     
+    handles.tbl=[handles.cg; handles.t; handles.N];
     ejecuto_popupmenu(handles);
     
-    case 0         
-    set(handles.b4, 'Value',0);
-    set(handles.b11, 'Value',0);
-    set(handles.b12, 'Value',0);
-    set(handles.b16, 'Value',0);
-    set(handles.b17, 'Value',0);
-    set(handles.b18, 'Value',0);
-    set(handles.b19, 'Value',0);
-
+    case 0 
+        
+        if(handles.bot_4==1)
+            set(handles.b4, 'Value',0);
+        end
+        
+        if(handles.bot_11==1)
+            set(handles.b11, 'Value',0);
+        end
+        
+        if(handles.bot_12==1)
+            set(handles.b12, 'Value',0);
+        end
+        
+        if (handles.bot_16==1)
+            set(handles.b16, 'Value',0);
+        end
+        
+        if(handles.bot_17==1)
+            set(handles.b17, 'Value',0);
+        end
+        
+        if(handles.bot_18==1)
+            set(handles.b18, 'Value',0);
+        end
+        
+        if(handles.bot_19==1)
+            set(handles.b19, 'Value',0);
+        end
+    
+    handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
+    ejecuto_popupmenu(handles);
+    
 end
 
+guidata(hObject, handles);
 
 end
 
 % --- Funcion que se ejecuta al presionar b4.
 function b4_Callback(hObject, ~, handles)
 
-handles.b4=get(hObject,'Value');
-switch handles.b4
+handles.bot_4=get(hObject,'Value');
+switch handles.bot_4
     case 1
        b4g=handles.cg(1);
        handles.tbl(1,1)=b4g;
@@ -392,8 +455,10 @@ switch handles.b4
         handles.tbl(1,1)=0;
         handles.tbl(2,1)=0;
         handles.tbl(3,1)=0;
+        ejecuto_popupmenu(handles);
 end
 
+guidata(hObject, handles);
 
 end
 
@@ -401,8 +466,8 @@ end
 % --- Funcion que se ejecuta al presionar b11.
 function b11_Callback(hObject, ~, handles)
 
-handles.b11=get(hObject,'Value');
-switch handles.b11
+handles.bot_11=get(hObject,'Value');
+switch handles.bot_11
     case 1
        b11g=handles.cg(2);
        handles.tbl(1,2)=b11g;
@@ -416,16 +481,17 @@ switch handles.b11
         handles.tbl(1,2)=0;
         handles.tbl(2,2)=0;
         handles.tbl(3,2)=0;
+        ejecuto_popupmenu(handles);
 end
-
+guidata(hObject, handles);
 end
 
 
 % --- Funcion que se ejecuta al presionar b12.
 function b12_Callback(hObject, ~, handles)
 
-handles.b12=get(hObject,'Value');
-switch handles.b12
+handles.bot_12=get(hObject,'Value');
+switch handles.bot_12
     case 1
        b12g=handles.cg(3);
        handles.tbl(1,3)=b12g;
@@ -439,16 +505,18 @@ switch handles.b12
         handles.tbl(1,3)=0;
         handles.tbl(2,3)=0;
         handles.tbl(3,3)=0;
+        ejecuto_popupmenu(handles);
 
 end
+guidata(hObject, handles);
 end
 
 
 % --- Funcion que se ejecuta al presionar b16.
 function b16_Callback(hObject, ~, handles)
 
-handles.b16=get(hObject,'Value');
-switch handles.b16
+handles.bot_16=get(hObject,'Value');
+switch handles.bot_16
     case 1
        b16g=handles.cg(4);
        handles.tbl(1,4)=b16g;
@@ -462,16 +530,18 @@ switch handles.b16
         handles.tbl(1,4)=0;
         handles.tbl(2,4)=0;
         handles.tbl(3,4)=0;
+        ejecuto_popupmenu(handles);
 
 end
+guidata(hObject, handles);
 end
 
 
 % --- Funcion que se ejecuta al presionar b17.
 function b17_Callback(hObject, ~, handles)
 
-handles.b17=get(hObject,'Value');
-switch handles.b17
+handles.bot_17=get(hObject,'Value');
+switch handles.bot_17
     case 1
        b17g=handles.cg(5);
        handles.tbl(1,5)=b17g;
@@ -485,15 +555,17 @@ switch handles.b17
         handles.tbl(1,5)=0;
         handles.tbl(2,5)=0;
         handles.tbl(3,5)=0;
+        ejecuto_popupmenu(handles);
 end
+guidata(hObject, handles);
 end
 
 
 % --- Funcion que se ejecuta al presionar b18.
 function b18_Callback(hObject, ~, handles)
 
-handles.b18=get(hObject,'Value');
-switch handles.b18
+handles.bot_18=get(hObject,'Value');
+switch handles.bot_18
     case 1
        b18g=handles.cg(6);
        handles.tbl(1,6)=b18g;
@@ -507,16 +579,18 @@ switch handles.b18
         handles.tbl(1,6)=0;
         handles.tbl(2,6)=0;
         handles.tbl(3,6)=0;
+        ejecuto_popupmenu(handles);
 
 end
+guidata(hObject, handles);
 end
 
 
 % --- Funcion que se ejecuta al presionar b19.
 function b19_Callback(hObject, ~, handles)
 
-handles.b19=get(hObject,'Value');
-switch handles.b19
+handles.bot_19=get(hObject,'Value');
+switch handles.bot_19
     case 1
        b19g=handles.cg(7);
        handles.tbl(1,7)=b19g;
@@ -530,7 +604,9 @@ switch handles.b19
         handles.tbl(1,7)=0;
         handles.tbl(2,7)=0;
         handles.tbl(3,7)=0;
+        ejecuto_popupmenu(handles);
 end
+guidata(hObject, handles);
 end
 
 
@@ -538,12 +614,7 @@ end
  
  % --- Executes during object creation, after setting all properties.
  function peso_CreateFcn(hObject, ~, ~)
- % hObject    handle to edit1 (see GCBO)
- % eventdata  reserved - to be defined in a future version of MATLAB
- % handles    empty - handles not created until after all CreateFcns called
 
- % Hint: edit controls usually have a white background on Windows.
- %       See ISPC and COMPUTER.
  if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
      set(hObject,'BackgroundColor','white');
  end
@@ -552,12 +623,7 @@ end
  
  % --- Executes during object creation, after setting all properties.
 function popupmenu_CreateFcn(hObject, ~, ~)
-% hObject    handle to popupmenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -565,25 +631,22 @@ end
 
 
 function edCOM_Callback(~, ~, ~)
-% hObject    handle to edCOM (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edCOM as text
-%        str2double(get(hObject,'String')) returns contents of edCOM as a double
 
 end
 
 % --- Executes during object creation, after setting all properties.
 function edCOM_CreateFcn(hObject, ~, ~)
-% hObject    handle to edCOM (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 end
+
+function resetear_CreateFcn(hObject, ~, ~)
+
+ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+     set(hObject,'BackgroundColor','white');
+ end
+ end
+
