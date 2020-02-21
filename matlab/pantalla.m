@@ -367,69 +367,28 @@ handles.bt=get(hObject,'Value');
 
 switch handles.bt
     case 1
-        if(handles.bot_4==0)
-            set(handles.b4, 'Value',1);
-        end
-        
-        if(handles.bot_11==0)
-            set(handles.b11, 'Value',1);
-        end
-        
-        if(handles.bot_12==0)
-            set(handles.b12, 'Value',1);
-        end
-        
-        if (handles.bot_16==0)
-            set(handles.b16, 'Value',1);
-        end
-        
-        if(handles.bot_17==0)
-            set(handles.b17, 'Value',1);
-        end
-        
-        if(handles.bot_18==0)
-            set(handles.b18, 'Value',1);
-        end
-        
-        if(handles.bot_19==0)
-            set(handles.b19, 'Value',1);
-        end
+        set(handles.b4, 'Value',1);
+        set(handles.b11, 'Value',1);
+        set(handles.b12, 'Value',1);
+        set(handles.b16, 'Value',1);
+        set(handles.b17, 'Value',1);
+        set(handles.b18, 'Value',1);
+        set(handles.b19, 'Value',1);
     
-    handles.tbl=[handles.cg; handles.t; handles.N];
-    ejecuto_popupmenu(handles);
+        handles.tbl=[handles.cg; handles.t; handles.N];
+        ejecuto_popupmenu(handles);
     
     case 0 
-        
-        if(handles.bot_4==1)
-            set(handles.b4, 'Value',0);
-        end
-        
-        if(handles.bot_11==1)
-            set(handles.b11, 'Value',0);
-        end
-        
-        if(handles.bot_12==1)
-            set(handles.b12, 'Value',0);
-        end
-        
-        if (handles.bot_16==1)
-            set(handles.b16, 'Value',0);
-        end
-        
-        if(handles.bot_17==1)
-            set(handles.b17, 'Value',0);
-        end
-        
-        if(handles.bot_18==1)
-            set(handles.b18, 'Value',0);
-        end
-        
-        if(handles.bot_19==1)
-            set(handles.b19, 'Value',0);
-        end
-    
-    handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
-    ejecuto_popupmenu(handles);
+        set(handles.b4, 'Value',0);
+        set(handles.b11, 'Value',0);
+        set(handles.b12, 'Value',0);
+        set(handles.b16, 'Value',0);
+        set(handles.b17, 'Value',0);
+        set(handles.b18, 'Value',0);
+        set(handles.b19, 'Value',0);
+
+        handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
+        ejecuto_popupmenu(handles);
     
 end
 
