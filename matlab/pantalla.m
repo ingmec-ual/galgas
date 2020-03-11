@@ -121,8 +121,8 @@ function btnConnect_Callback(hObject, ~, handles)
 % placas por pantalla y se conecta, activando los botones de medir
 
 try
-%    handles.nomter=get(handles.edCOM,'String');
-%    handles.s=GalgasComms(handles.nomter);
+    handles.nomter=get(handles.edCOM,'String');
+    handles.s=GalgasComms(handles.nomter);
 
     set(handles.btnConnect, 'Enable', 'off');
     set(handles.btnDisconnect, 'Enable', 'on');
@@ -257,26 +257,20 @@ if (length(handles.cg)<2)
     return
 end
 
-cero=[0 0 0 0 0 0 0];
-switch handles.x
-    case 1
-        defor=handles.tbl(1,:);
-        set(handles.tabla,'data', defor); % Obtengo valores de deformacion 
-       
-    case 2
-        A=handles.tbl(2,:);
-        tension=[cero; A];
-        set(handles.tabla,'data', tension);   % Obtengo valores de tension 
-        
-    case 3
-        B=handles.tbl(3,:);
-        axil=[cero; cero; B];
-        set(handles.tabla,'data', axil);   % Obtengo valores de axiles
-        
-    case 4
-        total=[handles.tbl];
-        set(handles.tabla,'data', total);   % Obtengo valores de axiles        
+deformaciones=handles.tbl(1,:);
+disp('DEFS:');
+disp(deformaciones);
+
+vals={};
+for i=1:length(deformaciones)
+    defor = deformaciones(i);
+    if (1)
+        vals{1,i} = sprintf('%.03f uE', 1e6*defor);
+        vals{2,i} = handles.tbl(2,i);
+        vals{3,i} = handles.tbl(3,i);
+    end            
 end
+set(handles.tabla,'data', vals); % Obtengo valores de deformacion 
 
 end
 
@@ -322,13 +316,18 @@ handles = guidata(hFigure);
 
 C=casos;    % Ejecuto script
 
-MEDIR_SISTEMA_REAL=4;
+MEDIR_SISTEMA_REAL=1;
 
 if (MEDIR_SISTEMA_REAL==1)
-    % Lista de placas a leer:
-    IDs=[4; 11; 12; 16; 17; 18; 19];
-
-    handles.cg = leer_galgas(handles.s, IDs);
+    handles.cg = zeros(1,7);
+    
+    %IDS: 4; 11; 12; 16; 17; 18; 19];
+    
+    % Laura: Repetir para cada barra!    
+    if (get(handles.b19, 'Value'))
+        handles.cg(7)=leer_galgas(handles.s, 19);
+    end
+    
 else
     % Datos simulados de prueba:
     handles.cg=[-37.0810, 24.7207, 49.4414, -418.6444, -209.3222, 209.3222, -209.3222];
@@ -355,6 +354,9 @@ set(handles.peso,'String',texto);
 
 % --- Actualizo seleccion de TC-----------------------------------------   
 actualiza_grafica_barras(handles);
+
+% LAURA: Actualizar la tabla aqui!
+% Datos actualizados estan en "cg".
 
 guidata(hFigure,handles);
  end
