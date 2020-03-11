@@ -322,7 +322,7 @@ handles = guidata(hFigure);
 
 C=casos;    % Ejecuto script
 
-MEDIR_SISTEMA_REAL=3;
+MEDIR_SISTEMA_REAL=1;
 
 if (MEDIR_SISTEMA_REAL==1)
     % Lista de placas a leer:
