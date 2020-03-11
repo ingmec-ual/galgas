@@ -139,14 +139,14 @@ end
 
 
 % --- Funcion que se ejecuta al presionar boton btnDisconnect.
-function btnDisconnect_Callback(hObject, ~, handles)
+function btnDisconnect_Callback(hObject, eventData, handles)
 
 % Se desconecta el puerto serie en el que van conectadas las placas
 
 try
     clear handles.s;
     
-    resetear_Callback(handles);
+    resetear_Callback(hObject, eventData, handles);
     
     set(handles.btnConnect, 'Enable', 'on');
     set(handles.btnDisconnect, 'Enable', 'off');
@@ -154,7 +154,7 @@ try
     guidata(hObject,handles);
  
 catch ME
-    msgbox(ME.message,'Error abriendo puerto serie');
+    msgbox(ME.message,'Error desconectando');
 end
 
 end
@@ -322,7 +322,7 @@ handles = guidata(hFigure);
 
 C=casos;    % Ejecuto script
 
-MEDIR_SISTEMA_REAL=1;
+MEDIR_SISTEMA_REAL=4;
 
 if (MEDIR_SISTEMA_REAL==1)
     % Lista de placas a leer:
