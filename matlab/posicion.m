@@ -13,8 +13,8 @@ function [p]=posicion(cg,C)
 %   the Free Software Foundation, either version 3 of the License, or
 %   (at your option) any later version.
 % -----------------------------------------------------------
-
-cgn=(cg/max(abs(cg)));  %   vector deformaciones normalizado%
+cgu=cg*1e06;
+cgn=(cgu/max(abs(cgu)));  %   vector deformaciones normalizado
 %   Calculo la distancia de cada vector caso con el vector deformaciones
 %   medidas por las galgas
 d=zeros(1,5);   %   vector distancia vacio

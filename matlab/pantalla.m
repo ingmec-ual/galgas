@@ -53,16 +53,8 @@ handles.timer = timer('Name','MyTimer',               ...
 % x valor para popupmenu
 handles.TC = 'Traccion';
 handles.x = 1;
-handles.cg=[];
-handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
-handles.bt=0;
-handles.bot_4=0;
-handles.bot_11=0;
-handles.bot_12=0;
-handles.bot_16=0;
-handles.bot_17=0;
-handles.bot_18=0;
-handles.bot_19=0;
+handles.cg=zeros(1,7);
+handles.sim=1;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -99,20 +91,21 @@ handles.TC=get(hObject, 'String');
 actualiza_grafica_barras(handles);
 end
 
-
-% --- Funcion que se ejecuta al cambiar valores en popupmenu
-function popupmenu_Callback(hObject, ~, handles)
-
-% Muestra en la tabla los valores de deformaciones, axiles y tensiones
-% correspondientes a cada barra segun se selecciona en el popupmenu
-
-handles.x=get(hObject,'Value');
-% Update handles structure
-guidata(hObject, handles);
-
-ejecuto_popupmenu(handles);
+% --- Se ejecuta cuando un objeto del tipo_medicion cambia
+function tipo_medicion_SelectionChangedFcn(hObject, eventdata, handles)
+handles.medicion=get(hObject, 'String');
+switch handles.medicion
+    case 'simulacion'
+        handles.sim=1;
+        set(handles.medir, 'Enable', 'on');
+    case 'real'
+        handles.sim=0;
+        set(handles.btnConnect, 'Enable', 'on');
+        set(handles.text5, 'Enable', 'on');
+        set(handles.edCOM, 'Enable', 'on');
 end
 
+end
 
 % --- Funcion que se ejecuta al presionar boton btnConnect.
 function btnConnect_Callback(hObject, ~, handles)
@@ -159,7 +152,6 @@ end
 
 end
 
-
 % --- Funcion que se ejecuta al presionar boton medir
 function medir_Callback(~, ~, handles)
 
@@ -169,17 +161,8 @@ start(handles.timer);
 % Desactiva y activa los botones
 set(handles.medir, 'Enable', 'off');
 set(handles.resetear, 'Enable', 'on');
-set(handles.todas, 'Enable', 'on');
-set(handles.b4, 'Enable', 'on');
-set(handles.b11, 'Enable', 'on');
-set(handles.b12, 'Enable', 'on');
-set(handles.b16, 'Enable', 'on');
-set(handles.b17, 'Enable', 'on');
-set(handles.b18, 'Enable', 'on');
-set(handles.b19, 'Enable', 'on');
 set(handles.traccion, 'Enable', 'on');
 set(handles.compresion, 'Enable', 'on');
-set(handles.popupmenu, 'Enable', 'on');
  
 end
 
@@ -213,67 +196,15 @@ grafica_puente;
 axis equal;
 
 % Activa y desactiva los botones
-set(handles.todas, 'Value',0);
-set(handles.b4, 'Value',0);
-set(handles.b11, 'Value',0);
-set(handles.b12, 'Value',0);
-set(handles.b16, 'Value',0);
-set(handles.b17, 'Value',0);
-set(handles.b18, 'Value',0);
-set(handles.b19, 'Value',0);
-
 set(handles.medir, 'Enable', 'on');
-set(handles.todas, 'Enable', 'inactive');
-set(handles.b4, 'Enable', 'inactive');
-set(handles.b11, 'Enable', 'inactive');
-set(handles.b12, 'Enable', 'inactive');
-set(handles.b16, 'Enable', 'inactive');
-set(handles.b17, 'Enable', 'inactive');
-set(handles.b18, 'Enable', 'inactive');
-set(handles.b19, 'Enable', 'inactive');
 set(handles.traccion, 'Enable', 'inactive');
 set(handles.compresion, 'Enable', 'inactive');
-set(handles.popupmenu, 'Enable', 'inactive');
 set(handles.resetear, 'Enable', 'off');
 end
 
 %------------------------------------------------------------------------
 
 % ---MODULOS---
-
-% --- Funcion que se ejecuta al llamar al popupmenu
-function ejecuto_popupmenu(handles)
-
-% Muestra en la tabla los valores de deformaciones, axiles y tensiones
-% correspondientes a cada barra segun se selecciona en el popupmenu
-% cg vector deformaciones medidas por las galgas en uE
-% t vector tensiones en MPa
-% N vector axiles en N
-% datos valores que se insertan en la tabla
-
-% compruebo longitudo del vector cg, si no es correcto no continua
-% ejecutando el programa
-if (length(handles.cg)<2)
-    return
-end
-
-deformaciones=handles.tbl(1,:);
-disp('DEFS:');
-disp(deformaciones);
-
-vals={};
-for i=1:length(deformaciones)
-    defor = deformaciones(i);
-    if (1)
-        vals{1,i} = sprintf('%.03f uE', 1e6*defor);
-        vals{2,i} = handles.tbl(2,i);
-        vals{3,i} = handles.tbl(3,i);
-    end            
-end
-set(handles.tabla,'data', vals); % Obtengo valores de deformacion 
-
-end
-
 
 % --- Funcion que cambia color barras segun si estan sometidas a T/C
 function actualiza_grafica_barras(handles)
@@ -301,7 +232,7 @@ end
  function timerCallback(~, ~, hFigure)
  
 % C matriz de casos 
-% cg vector deformaciones medidas por las galgas en uE
+% cg vector deformaciones medidas por las galgas en E
 % p indica el caso (posicion) en la que se encuentra la persona
 % t vector tensiones en MPa
 % N vector axiles en N
@@ -314,26 +245,25 @@ handles = guidata(hFigure);
 
 % --- Calculo el peso que hay sobre el puente. --------------------------
 
-C=casos;    % Ejecuto script
-
-MEDIR_SISTEMA_REAL=1;
-
-if (MEDIR_SISTEMA_REAL==1)
-    handles.cg = zeros(1,7);
-    
-    %IDS: 4; 11; 12; 16; 17; 18; 19];
-    
-    % Laura: Repetir para cada barra!    
-    if (get(handles.b19, 'Value'))
-        handles.cg(7)=leer_galgas(handles.s, 19);
-    end
-    
-else
+% Obtengo el vector cg
+if (handles.sim==1)
     % Datos simulados de prueba:
-    handles.cg=[-37.0810, 24.7207, 49.4414, -418.6444, -209.3222, 209.3222, -209.3222];
-    % Sumar ruido aleatorio (mientras no se mida del real)
-    handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;
-end
+    handles.cg=[-3.7081e-05, 2.4721e-05, 4.9441e-05, -0.0004186, -0.0002093, 0.00020932, 0.00020932];
+    % Sumar ruido aleatorio 
+    handles.cg = handles.cg + randn(size(handles.cg,1),size(handles.cg,2))*0.1;    
+else
+    % Mido el sistema real
+    % IDS: [4; 11; 12; 16; 17; 18; 19];
+    handles.cg(1)=leer_galgas(handles.s, 4);
+    handles.cg(2)=leer_galgas(handles.s, 11);
+    handles.cg(3)=leer_galgas(handles.s, 12);
+    handles.cg(4)=leer_galgas(handles.s, 16);
+    handles.cg(5)=leer_galgas(handles.s, 17);
+    handles.cg(6)=leer_galgas(handles.s, 18);
+    handles.cg(7)=leer_galgas(handles.s, 19);
+end  
+    
+C=casos;    % Ejecuto script
 
 % Calculo la posicion sobre el puente 
 p=posicion(handles.cg,C);
@@ -352,224 +282,36 @@ F=calculo_peso(handles.N,K,p);
 texto=sprintf('Peso: %5.1f Kg',F);
 set(handles.peso,'String',texto);
 
-% --- Actualizo seleccion de TC-----------------------------------------   
+% --- Actualizo seleccion de TC-----------------------------------------      
 actualiza_grafica_barras(handles);
 
-% LAURA: Actualizar la tabla aqui!
-% Datos actualizados estan en "cg".
+% --- Actualizo tabla---------------------------------------------------   
+
+% Mostrar deformaciones en tabla
+for i=1:length(handles.cg)
+    defor=handles.cg(i)*1e6;
+    deformacion(i)=sprintf('%.03f uE', defor);
+end
+deformaciones=handles.tbl(1,:);
+
+% Mostrar tensiones en tabla
+for i=1:length(handles.cg)
+    tens=handles.t(i);
+    tensiones(i)=sprintf('%.03f MPa', tens);
+end
+tensiones=handles.tbl(2,:);
+
+% Mostrar axiles en tabla
+for i=1:length(handles.cg)
+    ax=handles.N(i);
+    axiles(i)=sprintf('%.03f N', ax);
+end
+axiles=handles.tbl(3,:);
+ 
+set(handles.tabla, 'data', handles.tbl);  % Muestro valores de la tabla
 
 guidata(hFigure,handles);
  end
-
-
-% --- Funcion que se ejecuta al presionar todas.
-function todas_Callback(hObject, ~, handles)
-
-handles.bt=get(hObject,'Value');
-
-switch handles.bt
-    case 1
-        set(handles.b4, 'Value',1);
-        set(handles.b11, 'Value',1);
-        set(handles.b12, 'Value',1);
-        set(handles.b16, 'Value',1);
-        set(handles.b17, 'Value',1);
-        set(handles.b18, 'Value',1);
-        set(handles.b19, 'Value',1);
-    
-        handles.tbl=[handles.cg; handles.t; handles.N];
-        ejecuto_popupmenu(handles);
-    
-    case 0 
-        set(handles.b4, 'Value',0);
-        set(handles.b11, 'Value',0);
-        set(handles.b12, 'Value',0);
-        set(handles.b16, 'Value',0);
-        set(handles.b17, 'Value',0);
-        set(handles.b18, 'Value',0);
-        set(handles.b19, 'Value',0);
-
-        handles.tbl=[0 0 0 0 0 0 0; 0 0 0 0 0 0 0; 0 0 0 0 0 0 0];
-        ejecuto_popupmenu(handles);
-    
-end
-
-guidata(hObject, handles);
-
-end
-
-% --- Funcion que se ejecuta al presionar b4.
-function b4_Callback(hObject, ~, handles)
-
-handles.bot_4=get(hObject,'Value');
-switch handles.bot_4
-    case 1
-       b4g=handles.cg(1);
-       handles.tbl(1,1)=b4g;
-       b4t=handles.t(1);
-       handles.tbl(2,1)=b4t;
-       b4n=handles.N(1);
-       handles.tbl(3,1)=b4n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,1)=0;
-        handles.tbl(2,1)=0;
-        handles.tbl(3,1)=0;
-        ejecuto_popupmenu(handles);
-end
-
-guidata(hObject, handles);
-
-end
-
-
-% --- Funcion que se ejecuta al presionar b11.
-function b11_Callback(hObject, ~, handles)
-
-handles.bot_11=get(hObject,'Value');
-switch handles.bot_11
-    case 1
-       b11g=handles.cg(2);
-       handles.tbl(1,2)=b11g;
-       b11t=handles.t(1);
-       handles.tbl(2,2)=b11t;
-       b11n=handles.N(2);
-       handles.tbl(3,2)=b11n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,2)=0;
-        handles.tbl(2,2)=0;
-        handles.tbl(3,2)=0;
-        ejecuto_popupmenu(handles);
-end
-guidata(hObject, handles);
-end
-
-
-% --- Funcion que se ejecuta al presionar b12.
-function b12_Callback(hObject, ~, handles)
-
-handles.bot_12=get(hObject,'Value');
-switch handles.bot_12
-    case 1
-       b12g=handles.cg(3);
-       handles.tbl(1,3)=b12g;
-       b12t=handles.t(3);
-       handles.tbl(2,3)=b12t;
-       b12n=handles.N(3);
-       handles.tbl(3,3)=b12n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,3)=0;
-        handles.tbl(2,3)=0;
-        handles.tbl(3,3)=0;
-        ejecuto_popupmenu(handles);
-
-end
-guidata(hObject, handles);
-end
-
-
-% --- Funcion que se ejecuta al presionar b16.
-function b16_Callback(hObject, ~, handles)
-
-handles.bot_16=get(hObject,'Value');
-switch handles.bot_16
-    case 1
-       b16g=handles.cg(4);
-       handles.tbl(1,4)=b16g;
-       b16t=handles.t(4);
-       handles.tbl(2,4)=b16t;
-       b16n=handles.N(4);
-       handles.tbl(3,4)=b16n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,4)=0;
-        handles.tbl(2,4)=0;
-        handles.tbl(3,4)=0;
-        ejecuto_popupmenu(handles);
-
-end
-guidata(hObject, handles);
-end
-
-
-% --- Funcion que se ejecuta al presionar b17.
-function b17_Callback(hObject, ~, handles)
-
-handles.bot_17=get(hObject,'Value');
-switch handles.bot_17
-    case 1
-       b17g=handles.cg(5);
-       handles.tbl(1,5)=b17g;
-       b17t=handles.t(5);
-       handles.tbl(2,5)=b17t;
-       b17n=handles.N(5);
-       handles.tbl(3,5)=b17n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,5)=0;
-        handles.tbl(2,5)=0;
-        handles.tbl(3,5)=0;
-        ejecuto_popupmenu(handles);
-end
-guidata(hObject, handles);
-end
-
-
-% --- Funcion que se ejecuta al presionar b18.
-function b18_Callback(hObject, ~, handles)
-
-handles.bot_18=get(hObject,'Value');
-switch handles.bot_18
-    case 1
-       b18g=handles.cg(6);
-       handles.tbl(1,6)=b18g;
-       b18t=handles.t(6);
-       handles.tbl(2,6)=b18t;
-       b18n=handles.N(6);
-       handles.tbl(3,6)=b18n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,6)=0;
-        handles.tbl(2,6)=0;
-        handles.tbl(3,6)=0;
-        ejecuto_popupmenu(handles);
-
-end
-guidata(hObject, handles);
-end
-
-
-% --- Funcion que se ejecuta al presionar b19.
-function b19_Callback(hObject, ~, handles)
-
-handles.bot_19=get(hObject,'Value');
-switch handles.bot_19
-    case 1
-       b19g=handles.cg(7);
-       handles.tbl(1,7)=b19g;
-       b19t=handles.t(7);
-       handles.tbl(2,7)=b19t;
-       b19n=handles.N(7);
-       handles.tbl(3,7)=b19n;
-       ejecuto_popupmenu(handles);
-       
-    case 0
-        handles.tbl(1,7)=0;
-        handles.tbl(2,7)=0;
-        handles.tbl(3,7)=0;
-        ejecuto_popupmenu(handles);
-end
-guidata(hObject, handles);
-end
-
 
 %-----------------------------------------------------------------------  
  
@@ -580,34 +322,15 @@ end
      set(hObject,'BackgroundColor','white');
  end
  end
-
  
- % --- Executes during object creation, after setting all properties.
-function popupmenu_CreateFcn(hObject, ~, ~)
-
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-end
-
-
-function edCOM_Callback(~, ~, ~)
-
-end
-
-% --- Executes during object creation, after setting all properties.
 function edCOM_CreateFcn(hObject, ~, ~)
 
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 end
 
-function resetear_CreateFcn(hObject, ~, ~)
 
- if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-     set(hObject,'BackgroundColor','white');
- end
- end
+function tipo_medicion_CreateFcn(hObject, ~, ~)
 
+ end
