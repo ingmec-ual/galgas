@@ -27,7 +27,7 @@ try
         
         cg=[cg, strain];
 
-        fprintf(' Strain[%i]=Volt=%f strain=%g\n', ID, new_strain_Vadc, strain);
+        fprintf(' Strain=%f\n', new_strain);
     end
     
 catch ME

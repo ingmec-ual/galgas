@@ -2,7 +2,7 @@ function [t]=calculo_tension(cg)
 
 % Calulo de tensiones a partir de las deformaciones obtenidas por las
 % galgas extensiometricas 
-% cg vector deformaciones (E) medidas por las galgas
+% cg vector deformaciones (uE) medidas por las galgas
 % -----------------------------------------------------------
 %   Copyright (c) 2018-2019, Laura Gomez Alvarez 
 %   University of Almeria
@@ -14,12 +14,12 @@ function [t]=calculo_tension(cg)
 % -----------------------------------------------------------
 
 E=66000; % modulo elastico del acero en N/mm2
-t1=cg(1)*E;     % barra 4
-t2=cg(2)*E;     % barra 11
-t3=cg(3)*E;     % barra 12
-t4=cg(4)*E;     % barra 16
-t5=cg(5)*E;     % barra 17
-t6=cg(6)*E;     % barra 18
-t7=cg(7)*E;     % barra 19
+t1=cg(1)*1e-06*E;     % barra 4
+t2=cg(2)*1e-06*E;     % barra 11
+t3=cg(3)*1e-06*E;     % barra 12
+t4=cg(4)*1e-06*E;     % barra 16
+t5=cg(5)*1e-06*E;     % barra 17
+t6=cg(6)*1e-06*E;     % barra 18
+t7=cg(7)*1e-06*E;     % barra 19
 t=[t1, t2, t3, t4, t5, t6, t7]; % vector tension en MPa 
 end

@@ -13,13 +13,13 @@ function compresion(cg)
 %   (at your option) any later version.
 % -----------------------------------------------------------
 
-v1=cg(1)*1e6;
-v2=cg(2)*1e6;
-v3=cg(3)*1e6;
-v4=cg(4)*1e6;
-v5=cg(5)*1e6;
-v6=cg(6)*1e6;
-v7=cg(7)*1e6;
+v1=cg(1);
+v2=cg(2);
+v3=cg(3);
+v4=cg(4);
+v5=cg(5);
+v6=cg(6);
+v7=cg(7);
 
 %   Cuadrado 1
 x1=[0.5, 0.5, 1, 1, 0.5];
