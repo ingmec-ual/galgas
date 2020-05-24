@@ -95,18 +95,18 @@ guidata(hObject,handles);
 
 end
 
-% --- Selecciono el modo de medicion: NO/REAL
-function tipo_medicion_SelectionChangedFcn(hObject, eventdata, handles)
+% --- Selecciono el tipo de resultados
+function tipo_medicion_SelectionChangedFcn(hObject, ~, handles)
 
-handles.medicion=get(hObject,'String');
+handles.resul=get(hObject,'String');
 
-switch handles.medicion
+switch handles.resul
     case 'Simulacion'
         set(handles.medir, 'Enable', 'on');
         set(handles.real, 'Enable', 'off');
         handles.sim=1;
         
-    case 'Real'
+    case 'Medicion'
         set(handles.text5, 'Enable', 'on');
         set(handles.edCOM, 'Enable', 'on');
         set(handles.btnConnect, 'Enable', 'on');
@@ -180,7 +180,7 @@ end
 
 
 % --- Funcion que se ejecuta al presionar boton resetear.
-function resetear_Callback(handles)
+function resetear_Callback(hObject, evendata, handles)
 
 % Resetea la pantalla de la interfaz
 % Para el temporizador
@@ -218,9 +218,8 @@ guidata(hObject,handles);
 end
 
 % --- Executes on button press in salir.
-function salir_Callback(hObject, eventdata, handles)
+function salir_Callback(hObject, evendata, handles)
 
-resetear_Callback(handles);
 set(handles.text5, 'Enable', 'off');
 set(handles.edCOM, 'Enable', 'off');
 set(handles.btnConnect, 'Enable', 'off');
@@ -228,6 +227,9 @@ set(handles.medir, 'Enable', 'off');
 set(handles.simulacion, 'Enable', 'on');
 set(handles.real, 'Enable', 'on');
 set(handles.btnDisconnect, 'Enable', 'off');
+set(handles.no,'Value', 1);
+set(handles.off, 'Value', 1);
+resetear_Callback(hObject, evendata, handles);
 
 end
 
