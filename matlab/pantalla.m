@@ -254,9 +254,9 @@ else
    cla;
    switch handles.TC
        case 'Traccion'
-         traccion(handles.cg);   % Ejecuto script
+         traccion(handles.p);   % Ejecuto script
        case 'Compresion'
-         compresion(handles.cg); % Ejecuto script 
+         compresion(handles.p); % Ejecuto script 
    end
     
    axis equal;
@@ -314,9 +314,9 @@ if (length(handles.cg)<2)
 else  
     
     % Calculo la posicion sobre el puente 
-    p=posicion(handles.cg,C);
+    handles.p=posicion(handles.cg,C);
     % Muestro en pantalla la posicion en la que se encuentra la persona
-    img=imread(sprintf('caso%d.jpg',p));
+    img=imread(sprintf('caso%d.jpg',handles.p));
     imshow(img,'Parent',handles.foto);
     axis equal;
 
@@ -324,7 +324,7 @@ else
     handles.t=calculo_tension(handles.cg);
     handles.N=calculo_axiles(handles.t);
     K=constante();
-    F=calculo_peso(handles.N,K,p);
+    F=calculo_peso(handles.N,K,handles.p);
 
     % --- Muestro valores actuales del peso-----------------------------
     texto=sprintf('Peso: %5.1f Kg',F);
