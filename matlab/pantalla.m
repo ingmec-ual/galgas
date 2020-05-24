@@ -91,6 +91,8 @@ else
     actualiza_grafica_barras(handles);
 end
 
+guidata(hObject,handles);
+
 end
 
 % --- Selecciono el modo de medicion: NO/REAL
@@ -210,6 +212,9 @@ set(handles.medir, 'Enable', 'on');
 set(handles.compresion, 'Enable', 'inactive');
 set(handles.traccion, 'Enable', 'inactive');
 set(handles.resetear, 'Enable', 'off');
+
+guidata(hObject,handles);
+
 end
 
 % --- Executes on button press in salir.
